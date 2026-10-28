@@ -38,7 +38,7 @@
     <GlassCard class="card fade-up">
       <h3 class="card-title">关于</h3>
       <p class="about-text">久坐肩颈腰背科学运动干预助手</p>
-      <p class="about-text">上海体育大学智体学院 · 华为ICT大赛创新赛道</p>
+      <p class="about-text">SUS SISE · 华为ICT大赛创新赛道</p>
       <p class="disclaimer">本工具提供健康运动指导，不替代医疗诊断，持续不适请及时就医。</p>
     </GlassCard>
 
