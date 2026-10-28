@@ -1,0 +1,12 @@
+# 测试脚本和日志
+*.log
+# 构建产物与缓存
+__pycache__/
+*.pyc
+project/frontend/dist/
+.merkle-snapshot.json
+
+# 依赖与工具私有目录
+node_modules/
+.codeartsdoer/
+.creative-design/

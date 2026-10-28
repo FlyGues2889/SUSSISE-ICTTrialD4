@@ -1,0 +1,25 @@
+{
+  "name": "sedentary-health-frontend",
+  "version": "1.0.0",
+  "description": "久坐肩颈腰背科学运动干预助手 - 前端",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode demo",
+    "dev:cloud": "vite --mode cloud",
+    "build": "vite build --mode demo",
+    "build:cloud": "vite build --mode cloud",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "echarts": "^5.5.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.0"
+  }
+}
