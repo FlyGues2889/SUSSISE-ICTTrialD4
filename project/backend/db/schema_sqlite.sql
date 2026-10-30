@@ -67,3 +67,22 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     related_plans  TEXT,
     category       TEXT
 );
+CREATE TABLE IF NOT EXISTS plan_favorite (
+    user_id    INTEGER NOT NULL,
+    plan_id    INTEGER NOT NULL,
+    created_at TEXT DEFAULT (datetime('now','localtime')),
+    PRIMARY KEY (user_id, plan_id)
+);
+
+CREATE TABLE IF NOT EXISTS custom_plan (
+    plan_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    name         TEXT NOT NULL,
+    duration_min INTEGER NOT NULL,
+    target_area  TEXT NOT NULL,
+    scene        TEXT NOT NULL,
+    movements    TEXT NOT NULL,
+    description  TEXT,
+    created_at   TEXT DEFAULT (datetime('now','localtime'))
+);
+CREATE INDEX IF NOT EXISTS idx_custom_user ON custom_plan(user_id);

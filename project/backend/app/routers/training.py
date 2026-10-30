@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user
 from app.db.mysql import get_session, USE_SQLITE
+from app.services import cache
 
 router = APIRouter()
 
@@ -23,6 +24,7 @@ async def log_training(req: TrainingLogRequest, user: dict = Depends(get_current
         {"uid": user["user_id"], "pid": req.plan_id, "dur": req.duration_actual},
     )
     await session.commit()
+    await cache.delete(f"user:streak:{user['user_id']}")
     return {"logged": True}
 
 
@@ -54,13 +56,20 @@ async def training_stats(period: str = Query("week"), user: dict = Depends(get_c
 
 @router.get("/streak", summary="连续打卡天数")
 async def streak_days(user: dict = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    cache_key = f"user:streak:{user['user_id']}"
+    cached = await cache.get_json(cache_key)
+    if cached is not None:
+        return cached
+
     rows = await session.execute(
         text("SELECT DISTINCT DATE(created_at) as date FROM training_log WHERE user_id = :uid ORDER BY date DESC LIMIT 365"),
         {"uid": user["user_id"]},
     )
     dates = [str(r.date) for r in rows]
     if not dates:
-        return {"streak": 0}
+        result = {"streak": 0}
+        await cache.set_json(cache_key, result, 300)
+        return result
 
     from datetime import date, timedelta
     today = date.today()
@@ -75,4 +84,6 @@ async def streak_days(user: dict = Depends(get_current_user), session: AsyncSess
             continue
         else:
             break
-    return {"streak": streak}
+    result = {"streak": streak}
+    await cache.set_json(cache_key, result, 300)
+    return result

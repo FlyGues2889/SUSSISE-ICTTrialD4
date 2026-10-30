@@ -1,0 +1,136 @@
+{
+  "src": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\傻瓜化流程分析.html",
+  "url": "file:///E:/.%E8%B5%84%E6%96%99/%E5%8D%8E%E4%B8%BAICT/D4/%E5%82%BB%E7%93%9C%E5%8C%96%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/%E5%82%BB%E7%93%9C%E5%8C%96%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html",
+  "outdir": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "screenshot": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_desktop.jpg",
+      "screenshotBytes": 118852,
+      "truncated": false,
+      "structure": {
+        "title": "简单到不用想 — 傻瓜化流程设计分析",
+        "firstH1": "简单到，不用想。",
+        "viewport": {
+          "w": 1416,
+          "h": 761
+        },
+        "fullpage": {
+          "w": 1416,
+          "h": 3674
+        },
+        "counts": {
+          "section": 5,
+          "h1": 1,
+          "h2": 5,
+          "img": 0,
+          "canvas": 0,
+          "svg": 1,
+          "links": 0,
+          "buttons": 1
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "reportSource": "cdp"
+    },
+    "mobile": {
+      "slices": [
+        "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_mobile_p1of2.jpg",
+        "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_mobile_p2of2.jpg"
+      ],
+      "sliceHint": "按顺序 Read slices 里的各分片。",
+      "truncated": false,
+      "structure": {
+        "title": "简单到不用想 — 傻瓜化流程设计分析",
+        "firstH1": "简单到，不用想。",
+        "viewport": {
+          "w": 492,
+          "h": 705
+        },
+        "fullpage": {
+          "w": 492,
+          "h": 4396
+        },
+        "counts": {
+          "section": 5,
+          "h1": 1,
+          "h2": 5,
+          "img": 0,
+          "canvas": 0,
+          "svg": 1,
+          "links": 0,
+          "buttons": 1
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "reportSource": "cdp"
+    }
+  },
+  "engine": "chrome_cli",
+  "chromiumExec": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "engineDegraded": true,
+  "engineDegradedReason": "playwright 未装",
+  "elapsedSec": 7.79,
+  "schemaVersion": 2,
+  "status": "pass",
+  "engineInfo": {
+    "name": "chrome_cli",
+    "degraded": true,
+    "degradedReasons": [
+      "playwright 未装"
+    ]
+  },
+  "input": {
+    "original": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\傻瓜化流程分析.html",
+    "resolvedPath": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\傻瓜化流程分析.html",
+    "baseUrl": "file:///E:/.%E8%B5%84%E6%96%99/%E5%8D%8E%E4%B8%BAICT/D4/%E5%82%BB%E7%93%9C%E5%8C%96%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/%E5%82%BB%E7%93%9C%E5%8C%96%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html",
+    "protocol": "file",
+    "cwd": "E:\\.资料\\华为ICT\\D4",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "path": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_desktop.jpg",
+        "size": 118852,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      },
+      {
+        "viewport": "mobile",
+        "tiles": [
+          "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_mobile_p1of2.jpg",
+          "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\傻瓜化流程分析_mobile_p2of2.jpg"
+        ],
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "findings": [],
+  "prioritizedActions": [],
+  "reportPath": "E:\\.资料\\华为ICT\\D4\\傻瓜化流程分析\\_shots\\report.json"
+}

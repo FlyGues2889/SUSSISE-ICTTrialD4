@@ -1,33 +1,66 @@
 <template>
   <div class="page">
     <h1 class="page-title">体态自评</h1>
-    <p class="page-sub">约 3 分钟完成，评估后为你匹配专属方案</p>
+    <p class="page-sub">一题一题来，答完就知道该练什么</p>
 
-    <div v-if="!result" class="assessment-form glass fade-up">
-      <AppSteps :steps="stepList" :active="stepIndex" />
-
-      <div class="questions">
-        <div v-for="(q, idx) in currentQuestions" :key="q.id" class="question-item">
-          <p class="q-label">{{ idx + 1 }}. {{ q.label }}</p>
-          <AppRadioGroup
-            :model-value="answers[q.id]"
-            :options="freqOptions"
-            @update:model-value="(v) => (answers[q.id] = v)"
-          />
-        </div>
+    <div v-if="!result" class="assessment-form card-surface fade-up">
+      <div class="quiz-head">
+        <span class="quiz-area">{{ isNeck ? '肩颈评估' : '腰背评估' }}</span>
+        <span class="quiz-count">{{ answeredCount }} / {{ totalQuestions }}</span>
+      </div>
+      <div class="quiz-bar">
+        <div class="quiz-bar-fill" :style="{ width: progressPercent + '%' }" />
       </div>
 
-      <div class="actions">
-        <AppButton v-if="stepIndex > 0" type="secondary" @click="stepIndex--">上一步</AppButton>
-        <AppButton v-if="stepIndex < 1" type="primary" icon="arrowRight" @click="nextStep">下一步</AppButton>
-        <AppButton v-if="stepIndex === 1" type="primary" :loading="loading" @click="submitAll">提交评估</AppButton>
+      <div class="likert-legend">
+        <span class="legend-item"><i class="lg-dot lv-0" />无</span>
+        <span class="legend-item"><i class="lg-dot lv-1" />偶尔</span>
+        <span class="legend-item"><i class="lg-dot lv-2" />经常</span>
+        <span class="legend-item"><i class="lg-dot lv-3" />持续</span>
+      </div>
+
+      <Transition name="slide-q" mode="out-in">
+        <div :key="currentQ.id" class="question-item">
+          <p class="q-label">{{ currentQ.label }}</p>
+          <div class="likert">
+            <span class="likert-anchor left">无</span>
+            <div class="likert-dots">
+              <button
+                v-for="opt in freqOptions"
+                :key="opt.value"
+                type="button"
+                class="likert-dot"
+                :class="[`lv-${opt.value}`, { active: answers[currentQ.id] === opt.value }]"
+                :aria-label="opt.label"
+                @click="pick(opt.value)"
+              >
+                <span class="dot"></span>
+              </button>
+            </div>
+            <span class="likert-anchor right">持续</span>
+          </div>
+        </div>
+      </Transition>
+
+      <div class="quiz-foot">
+        <button v-if="currentIndex > 0" class="step-link" @click="prev">上一题</button>
+        <span v-else />
+        <AppButton
+          v-if="isLast"
+          type="accent"
+          size="lg"
+          :loading="loading"
+          :disabled="!allAnswered"
+          @click="submitAll"
+        >查看结果</AppButton>
+        <button v-else-if="isAnswered" class="step-link" @click="next">下一题 →</button>
       </div>
     </div>
 
-    <div v-else class="report glass fade-up">
-      <div :class="['risk-badge', result.risk_level]">
+    <div v-else class="report card-surface fade-up">
+      <div :class="['risk-badge', result.risk_grade || result.risk_level]">
         <span class="risk-label">{{ riskLabel }}</span>
-        <span class="risk-score">肩颈 {{ neckResult?.total_score || 0 }}分 · 腰背 {{ backResult?.total_score || 0 }}分</span>
+        <span class="risk-score">肩颈 {{ fmtScore(neckResult?.total_score) }} 分 · 腰背 {{ fmtScore(backResult?.total_score) }} 分（单侧满分 36.6）</span>
       </div>
 
       <div v-if="result.need_medical" class="medical-alert">
@@ -53,6 +86,13 @@
         <p class="evidence-fact">{{ result.evidence.fact }}</p>
         <p class="evidence-rec">{{ result.evidence.recommendation }}</p>
         <a :href="result.evidence.sourceUrl" target="_blank" class="evidence-source">来源：{{ result.evidence.source }} →</a>
+        <blockquote v-if="result.guide" class="evidence-guide">
+          <p>{{ result.guide.excerpt }}</p>
+          <a :href="result.guide.url" target="_blank" rel="noopener">
+            {{ result.guide.abbr }} · {{ result.guide.title }}（{{ result.guide.year }}）↗
+          </a>
+        </blockquote>
+        <button class="evidence-more" @click="$router.push('/guidelines')">查看全部指南依据 →</button>
       </div>
 
       <div v-if="!result.need_medical" class="flow-guide">
@@ -72,14 +112,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import AppSteps from '../components/ui/AppSteps.vue'
-import AppRadioGroup from '../components/ui/AppRadioGroup.vue'
+import { ref, reactive, computed, onBeforeUnmount } from 'vue'
 import AppButton from '../components/ui/AppButton.vue'
 import AppTag from '../components/ui/AppTag.vue'
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
 import { toast } from '../components/ui/toast.js'
 import { assessmentApi } from '../api'
+import { healthEvidence } from '../mock/healthEvidence'
 
 const NECK_QS = [
   { id: 'N1', label: '最近一周颈部僵硬感出现的频率' },
@@ -90,6 +129,10 @@ const NECK_QS = [
   { id: 'N6', label: '久坐后是否需要用手支撑头部' },
   { id: 'N7', label: '肩颈活动时是否有咔咔响声' },
   { id: 'N8', label: '肩颈不适是否影响睡眠' },
+  { id: 'N9', label: '最近一周颈部疼痛是否持续存在' },
+  { id: 'N10', label: '仰头或低头时是否感到受限' },
+  { id: 'N11', label: '是否出现手部握力下降或持物不稳' },
+  { id: 'N12', label: '久坐后是否需休息才能缓解肩颈疲劳' },
 ]
 const BACK_QS = [
   { id: 'B1', label: '最近一周腰部酸痛感出现的频率' },
@@ -100,9 +143,14 @@ const BACK_QS = [
   { id: 'B6', label: '久站后是否感到腰部无力需要坐下' },
   { id: 'B7', label: '腰部活动时是否有弹响或卡顿感' },
   { id: 'B8', label: '腰背不适是否影响日常活动' },
+  { id: 'B9', label: '晨起时是否感到腰部疼痛' },
+  { id: 'B10', label: '是否习惯久坐或坐姿不正' },
+  { id: 'B11', label: '是否因腰背痛在夜间痛醒' },
+  { id: 'B12', label: '久坐后腰背疼痛是否难以自行缓解' },
 ]
 
-const stepList = [{ title: '肩颈评估' }, { title: '腰背评估' }]
+const questions = [...NECK_QS, ...BACK_QS]
+const totalQuestions = questions.length
 const freqOptions = [
   { value: 0, label: '无' },
   { value: 1, label: '偶尔' },
@@ -110,7 +158,7 @@ const freqOptions = [
   { value: 3, label: '持续' },
 ]
 
-const stepIndex = ref(0)
+const currentIndex = ref(0)
 const loading = ref(false)
 const answers = reactive({})
 const neckResult = ref(null)
@@ -118,22 +166,51 @@ const backResult = ref(null)
 const result = ref(null)
 const confirmRef = ref(null)
 
-const currentQuestions = computed(() => stepIndex.value === 0 ? NECK_QS : BACK_QS)
-const riskLabel = computed(() => ({ low: '低风险', medium: '中风险', high: '高风险' }[result.value?.risk_level] || ''))
+const currentQ = computed(() => questions[currentIndex.value])
+const isNeck = computed(() => currentQ.value.id.startsWith('N'))
+const isLast = computed(() => currentIndex.value === totalQuestions - 1)
+const isAnswered = computed(() => answers[currentQ.value.id] !== undefined)
+const answeredCount = computed(() => questions.filter((q) => answers[q.id] !== undefined).length)
+const allAnswered = computed(() => answeredCount.value === totalQuestions)
+const progressPercent = computed(() => (answeredCount.value / totalQuestions) * 100)
+const riskLabel = computed(() => {
+  const gradeLabels = { low: '低风险', medium_low: '中低风险', medium_high: '中高风险', high: '高风险' }
+  const levelLabels = { low: '低风险', medium: '中风险', high: '高风险' }
+  return gradeLabels[result.value?.risk_grade] || levelLabels[result.value?.risk_level] || ''
+})
 const allProblems = computed(() => [...(neckResult.value?.problem_points || []), ...(backResult.value?.problem_points || [])])
 
-const nextStep = () => {
-  const qs = currentQuestions.value
-  for (const q of qs) {
-    if (answers[q.id] === undefined) return toast.info('请完成所有题目')
-  }
-  stepIndex.value = 1
+const MAX_SIDE_SCORE = 36.6
+const fmtScore = (score) => {
+  const value = Math.min(Number(score) || 0, MAX_SIDE_SCORE)
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+}
+
+let advanceTimer = null
+
+const pick = (value) => {
+  const firstAnswer = answers[currentQ.value.id] === undefined
+  answers[currentQ.value.id] = value
+  if (!firstAnswer || isLast.value) return
+  clearTimeout(advanceTimer)
+  advanceTimer = setTimeout(() => { currentIndex.value++ }, 220)
+}
+
+const next = () => {
+  clearTimeout(advanceTimer)
+  if (currentIndex.value < totalQuestions - 1) currentIndex.value++
+}
+
+const prev = () => {
+  clearTimeout(advanceTimer)
+  if (currentIndex.value > 0) currentIndex.value--
 }
 
 const submitAll = async () => {
-  const qs = currentQuestions.value
-  for (const q of qs) {
-    if (answers[q.id] === undefined) return toast.info('请完成所有题目')
+  if (!allAnswered.value) {
+    const idx = questions.findIndex((q) => answers[q.id] === undefined)
+    if (idx >= 0) currentIndex.value = idx
+    return toast.info('还有题目未作答')
   }
 
   loading.value = true
@@ -150,12 +227,15 @@ const submitAll = async () => {
       ? neckResult.value
       : backResult.value
 
+    const mainArea = higher === neckResult.value ? 'neck' : 'back'
     result.value = {
       risk_level: higher.risk_level,
+      risk_grade: higher.risk_grade || higher.risk_level,
       suggestion: higher.suggestion,
       need_medical: neckResult.value.need_medical || backResult.value.need_medical,
       safety_message: neckResult.value.need_medical ? neckResult.value.safety_message : backResult.value.safety_message,
-      evidence: higher.evidence,
+      evidence: higher.evidence || healthEvidence.getEvidenceText(mainArea),
+      guide: healthEvidence.getPlanGuideline(mainArea),
     }
     toast.success('评估完成')
   } catch (e) {
@@ -175,20 +255,160 @@ const reset = async () => {
     })
     if (!ok) return
   }
-  stepIndex.value = 0
+  currentIndex.value = 0
   Object.keys(answers).forEach(k => delete answers[k])
   neckResult.value = null
   backResult.value = null
   result.value = null
 }
+
+onBeforeUnmount(() => clearTimeout(advanceTimer))
 </script>
 
 <style scoped>
-.assessment-form { padding: 24px; }
-.questions { margin: 22px 0; }
-.question-item { margin-bottom: 20px; }
-.q-label { font-size: 15px; font-weight: 500; margin-bottom: 10px; line-height: 1.4; }
-.actions { display: flex; gap: 12px; justify-content: center; margin-top: 22px; }
+.assessment-form {
+  padding: 24px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.quiz-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+}
+.quiz-area { color: var(--accent); font-weight: 600; letter-spacing: 0.12em; }
+.quiz-bar {
+  height: 3px;
+  margin: 10px 0 0;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.quiz-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.question-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 0;
+}
+.q-label {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  margin-bottom: 30px;
+}
+
+.slide-q-enter-from { transform: translateY(16px); }
+.slide-q-enter-active { transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.slide-q-leave-to { transform: translateY(-12px); }
+.slide-q-leave-active { transition: transform 0.16s ease-in; }
+
+.quiz-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+}
+.step-link {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  padding: 10px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  transition: border-color 0.15s, color 0.15s;
+}
+.step-link:hover { border-color: rgba(0, 0, 0, 0.3); color: var(--accent); }
+
+.likert-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 18px;
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.lg-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+.lg-dot.lv-0 { border-color: #4caf50; background: #4caf50; }
+.lg-dot.lv-1 { border-color: #9e9e9e; background: #9e9e9e; }
+.lg-dot.lv-2 { border-color: #ff9800; background: #ff9800; }
+.lg-dot.lv-3 { border-color: #e53935; background: #e53935; }
+
+.likert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px;
+}
+.likert-anchor {
+  font-size: 12px;
+  color: var(--fg-3);
+  flex-shrink: 0;
+}
+.likert-anchor.left { color: #4caf50; }
+.likert-anchor.right { color: #e53935; }
+.likert-dots {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  justify-content: center;
+}
+.likert-dot {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+.likert-dot .dot {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 2px solid;
+  background: transparent;
+  transition: all 0.18s;
+}
+.likert-dot.lv-0 .dot { border-color: #4caf50; }
+.likert-dot.lv-1 .dot { border-color: #9e9e9e; }
+.likert-dot.lv-2 .dot { border-color: #ff9800; }
+.likert-dot.lv-3 .dot { border-color: #e53935; }
+.likert-dot.active .dot {
+  transform: scale(1.06);
+}
+.likert-dot.active.lv-0 .dot { background: #4caf50; border-color: #4caf50; }
+.likert-dot.active.lv-1 .dot { background: #9e9e9e; border-color: #9e9e9e; }
+.likert-dot.active.lv-2 .dot { background: #ff9800; border-color: #ff9800; }
+.likert-dot.active.lv-3 .dot { background: #e53935; border-color: #e53935; }
+.likert-dot.active { transform: scale(1.12); }
+
 
 .report { padding: 26px; }
 .risk-badge {
@@ -201,11 +421,16 @@ const reset = async () => {
 }
 .risk-badge.low { background: var(--accent-soft); }
 .risk-badge.medium { background: var(--warn-soft); }
-.risk-badge.high { background: rgba(29, 29, 31, 0.92); }
+.risk-badge.medium_low { background: var(--warn-soft); }
+.risk-badge.medium_high { background: var(--warn-strong-soft); }
+.risk-badge.high { background: var(--danger-soft); }
 .risk-label { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-.risk-badge.high .risk-label { color: #fff; }
+.risk-badge.low .risk-label { color: var(--accent); }
+.risk-badge.medium .risk-label,
+.risk-badge.medium_low .risk-label,
+.risk-badge.medium_high .risk-label { color: var(--warn); }
+.risk-badge.high .risk-label { color: var(--danger); }
 .risk-score { font-size: 13px; color: var(--fg-2); }
-.risk-badge.high .risk-score { color: rgba(255, 255, 255, 0.75); }
 
 .medical-alert {
   display: flex;
@@ -238,11 +463,17 @@ const reset = async () => {
 .flow-guide { margin-top: 24px; }
 .guide-text { font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 14px; }
 
-.evidence-section { background: #f8f9fa; border-radius: 8px; padding: 14px; margin: 16px 0; }
-.evidence-fact { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 6px; }
-.evidence-rec { font-size: 13px; color: #1f1f1f; line-height: 1.6; margin-bottom: 8px; font-weight: 500; }
-.evidence-source { font-size: 12px; color: #999; text-decoration: none; }
-.evidence-source:hover { color: #1f1f1f; }
+.evidence-section { background: var(--bg); border-radius: 12px; padding: 16px; margin: 16px 0; }
+.evidence-fact { font-size: 13px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
+.evidence-rec { font-size: 13px; color: var(--fg); line-height: 1.6; margin-bottom: 8px; font-weight: 500; }
+.evidence-source { font-size: 12px; color: var(--fg-3); text-decoration: none; }
+.evidence-source:hover { color: var(--accent); }
+.evidence-guide { margin-top: 14px; padding-left: 12px; border-left: 2px solid var(--accent-soft); }
+.evidence-guide p { font-size: 12px; color: var(--fg-2); line-height: 1.7; }
+.evidence-guide a { display: inline-block; margin-top: 6px; font-size: 11px; color: var(--fg-3); text-decoration: none; }
+.evidence-guide a:hover { color: var(--accent); }
+.evidence-more { margin-top: 14px; font-size: 12px; color: var(--fg-3); padding: 2px 0; }
+.evidence-more:hover { color: var(--accent); }
 
 @media (min-width: 768px) {
   .assessment-form, .report { padding: 32px; }

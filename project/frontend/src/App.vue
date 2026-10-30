@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <router-view />
-    <nav v-if="showNav" class="bottom-nav glass">
+    <nav v-if="showNav" class="bottom-nav card-surface">
       <router-link to="/" class="nav-item" :class="{ active: route.path === '/' }">
         <Icon name="home" :size="20" />
         <span>首页</span>
@@ -15,12 +15,33 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/ui/Icon.vue'
+import { startReminder, reloadReminderSettings, setReminderNavigationHandler } from './composables/useReminder'
 
 const route = useRoute()
+const router = useRouter()
 const showNav = computed(() => route.path !== '/login' && !route.path.startsWith('/session'))
+
+onMounted(async () => {
+  setReminderNavigationHandler(() => router.push('/plans'))
+  await startReminder()
+})
+
+let sessionLoaded = false
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/login') {
+      sessionLoaded = false
+      return
+    }
+    if (sessionLoaded) return
+    sessionLoaded = true
+    reloadReminderSettings()
+  }
+)
 </script>
 
 <style scoped>
@@ -32,13 +53,14 @@ const showNav = computed(() => route.path !== '/login' && !route.path.startsWith
 
 .bottom-nav {
   position: fixed;
-  bottom: 18px;
+  bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
+
   z-index: 100;
   display: flex;
   gap: 6px;
-  padding: 7px;
+  padding: 6px;
   border-radius: var(--radius-pill);
 }
 
@@ -57,9 +79,8 @@ const showNav = computed(() => route.path !== '/login' && !route.path.startsWith
 }
 
 .nav-item.active {
-  color: var(--fg);
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  color: var(--accent);
+  background: var(--accent-soft);
   font-weight: 600;
 }
 

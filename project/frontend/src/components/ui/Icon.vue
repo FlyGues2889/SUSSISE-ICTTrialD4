@@ -76,6 +76,9 @@
     <template v-else-if="name === 'hourglass'">
       <path d="M7 3h10M7 21h10M7 3v4l4 4v2l-4 4v4M17 3v4l-4 4v2l4 4v4" />
     </template>
+    <template v-else-if="name === 'heart'">
+      <path d="M12 20.8 4.9 13.9a4.7 4.7 0 0 1 6.6-6.7l.5.5.5-.5a4.7 4.7 0 0 1 6.6 6.7L12 20.8Z" />
+    </template>
   </svg>
 </template>
 

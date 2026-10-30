@@ -1,6 +1,6 @@
 <template>
   <div v-if="visible" class="dialog-mask" @click.self="onCancel">
-    <div class="dialog-card glass fade-up" role="dialog" aria-modal="true">
+    <div class="dialog-card card-surface fade-up" role="dialog" aria-modal="true">
       <h3 class="dialog-title">{{ title }}</h3>
       <p class="dialog-message">{{ message }}</p>
       <div class="dialog-actions">
@@ -48,9 +48,7 @@ const onCancel = () => { visible.value = false; resolveFn?.(false) }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.28);
   padding: 24px;
 }
 .dialog-card {

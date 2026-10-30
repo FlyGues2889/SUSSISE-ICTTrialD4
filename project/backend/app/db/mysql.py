@@ -46,6 +46,23 @@ async def init_db():
                 await conn.execute(text(stmt))
 
     await _seed_plans()
+    await _seed_kb()
+
+
+async def _seed_kb():
+    kb_path = os.path.join(os.path.dirname(__file__), "..", "..", "db", "seed_kb.sql")
+    async with async_session() as session:
+        count = await session.execute(text("SELECT COUNT(*) FROM knowledge_base"))
+        if count.scalar() > 0:
+            return
+        with open(kb_path, "r", encoding="utf-8") as f:
+            raw = f.read()
+        body = "\n".join(line for line in raw.splitlines() if not line.strip().startswith("--"))
+        for stmt in body.split(";"):
+            stmt = stmt.strip()
+            if stmt:
+                await session.execute(text(stmt))
+        await session.commit()
 
 
 async def _seed_plans():

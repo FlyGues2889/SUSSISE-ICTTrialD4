@@ -24,6 +24,16 @@ class AssessmentSubmitRequest(BaseModel):
     answers: dict
 
 
+def _risk_grade(risk_level: str, total_score: int) -> str:
+    if risk_level == "high" or total_score >= 23.79:
+        return "high"
+    if total_score >= 18.3:
+        return "medium_high"
+    if total_score >= 12.81:
+        return "medium_low"
+    return "low"
+
+
 @router.post("", summary="提交体态评估")
 async def submit_assessment(req: AssessmentSubmitRequest, user: dict = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
     result = assess_posture(req.area, req.answers)
@@ -50,6 +60,7 @@ async def submit_assessment(req: AssessmentSubmitRequest, user: dict = Depends(g
 
     return {
         "risk_level": result["risk_level"],
+        "risk_grade": result.get("risk_grade", result["risk_level"]),
         "total_score": result["total_score"],
         "problem_points": result["problem_points"],
         "suggestion": result["suggestion"],
@@ -73,6 +84,7 @@ async def assessment_history(user: dict = Depends(get_current_user), session: As
             "assessment_id": r.assessment_id,
             "area": r.area,
             "risk_level": r.risk_level,
+            "risk_grade": _risk_grade(r.risk_level, r.total_score),
             "total_score": r.total_score,
             "problem_points": json.loads(r.problem_points) if r.problem_points else [],
             "suggestion": r.suggestion,

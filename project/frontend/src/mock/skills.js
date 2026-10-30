@@ -1,42 +1,83 @@
 import { healthEvidence } from './healthEvidence'
 
-const RED_LINE_KEYS = ['N5', 'B5']
+const RED_LINE_KEYS = ['N5', 'N11', 'B5', 'B11']
 
 const DIMENSION_LABELS = {
   '疼痛频率': '疼痛频率偏高',
   '僵硬程度': '僵硬感明显',
   '活动受限': '活动受限',
   '姿势习惯': '姿势习惯不良',
+  '神经症状': '神经症状警示',
+  '功能影响': '功能影响明显',
 }
 
 const NECK_DIMS = {
-  N1: '僵硬程度', N2: '活动受限', N3: '疼痛频率', N4: '姿势习惯',
-  N5: '安全红线', N6: '姿势习惯', N7: '僵硬程度', N8: '疼痛频率',
+  N1: { dimension: '僵硬程度', weight: 1.0 },
+  N2: { dimension: '活动受限', weight: 1.0 },
+  N3: { dimension: '疼痛频率', weight: 1.0 },
+  N4: { dimension: '姿势习惯', weight: 0.8 },
+  N5: { dimension: '神经症状', weight: 1.5 },
+  N6: { dimension: '姿势习惯', weight: 0.8 },
+  N7: { dimension: '僵硬程度', weight: 0.8 },
+  N8: { dimension: '功能影响', weight: 1.0 },
+  N9: { dimension: '疼痛频率', weight: 1.0 },
+  N10: { dimension: '活动受限', weight: 1.0 },
+  N11: { dimension: '神经症状', weight: 1.5 },
+  N12: { dimension: '功能影响', weight: 0.8 },
 }
 const BACK_DIMS = {
-  B1: '疼痛频率', B2: '活动受限', B3: '僵硬程度', B4: '姿势习惯',
-  B5: '安全红线', B6: '活动受限', B7: '僵硬程度', B8: '疼痛频率',
+  B1: { dimension: '疼痛频率', weight: 1.0 },
+  B2: { dimension: '活动受限', weight: 1.0 },
+  B3: { dimension: '僵硬程度', weight: 1.0 },
+  B4: { dimension: '姿势习惯', weight: 0.8 },
+  B5: { dimension: '神经症状', weight: 1.5 },
+  B6: { dimension: '活动受限', weight: 1.0 },
+  B7: { dimension: '僵硬程度', weight: 0.8 },
+  B8: { dimension: '功能影响', weight: 1.0 },
+  B9: { dimension: '疼痛频率', weight: 1.0 },
+  B10: { dimension: '姿势习惯', weight: 0.8 },
+  B11: { dimension: '神经症状', weight: 1.5 },
+  B12: { dimension: '功能影响', weight: 0.8 },
 }
+
+// 满分 max_score = 3 × sum(weights) = 3 × 12.2 = 36.6
+// low < 12.81, medium_low < 18.3, medium_high < 23.79, high ≥ 23.79 或红线（红线题 ≥2 才触发）
+const MAX_SCORE = 36.6
+const LOW_THRESHOLD = MAX_SCORE * 0.35
+const HIGH_THRESHOLD = MAX_SCORE * 0.65
+const MEDIUM_SPLIT = (LOW_THRESHOLD + HIGH_THRESHOLD) / 2
+const DIM_PROBLEM_RATIO = 0.4
 
 export function assessPosture(area, answers) {
   const dims = area === 'neck' ? NECK_DIMS : BACK_DIMS
-  const totalScore = Object.values(answers).reduce((a, b) => a + b, 0)
-  const redLineHit = RED_LINE_KEYS.some(k => (answers[k] || 0) >= 1 && k in answers)
 
-  let riskLevel
-  if (redLineHit || totalScore >= 13) riskLevel = 'high'
-  else if (totalScore >= 6) riskLevel = 'medium'
-  else riskLevel = 'low'
-
-  const problemDims = {}
+  let weightedTotal = 0
   for (const [qid, score] of Object.entries(answers)) {
-    if (dims[qid] && score >= 2) {
-      const dim = dims[qid]
-      problemDims[dim] = (problemDims[dim] || 0) + 1
+    if (dims[qid]) weightedTotal += score * dims[qid].weight
+  }
+  const totalScore = Math.round(weightedTotal)
+
+  const redLineHit = RED_LINE_KEYS.some(k => (answers[k] || 0) >= 2 && k in answers)
+
+  let riskGrade
+  if (redLineHit || totalScore >= HIGH_THRESHOLD) riskGrade = 'high'
+  else if (totalScore >= MEDIUM_SPLIT) riskGrade = 'medium_high'
+  else if (totalScore >= LOW_THRESHOLD) riskGrade = 'medium_low'
+  else riskGrade = 'low'
+  const riskLevel = { low: 'low', medium_low: 'medium', medium_high: 'medium', high: 'high' }[riskGrade]
+
+  const dimScores = {}
+  const dimMax = {}
+  for (const [qid, score] of Object.entries(answers)) {
+    if (dims[qid]) {
+      const { dimension, weight } = dims[qid]
+      dimScores[dimension] = (dimScores[dimension] || 0) + score * weight
+      dimMax[dimension] = (dimMax[dimension] || 0) + 3 * weight
     }
   }
-  const problemPoints = Object.entries(problemDims)
+  const problemPoints = Object.entries(dimScores)
     .sort((a, b) => b[1] - a[1])
+    .filter(([dim, score]) => dimMax[dim] > 0 && score >= dimMax[dim] * DIM_PROBLEM_RATIO)
     .map(([dim]) => DIMENSION_LABELS[dim] || dim)
 
   let suggestion
@@ -46,7 +87,7 @@ export function assessPosture(area, answers) {
 
   const evidence = healthEvidence.getEvidenceText(area)
 
-  return { risk_level: riskLevel, total_score: totalScore, problem_points: problemPoints, suggestion, red_line_hit: redLineHit, evidence }
+  return { risk_level: riskLevel, risk_grade: riskGrade, total_score: totalScore, problem_points: problemPoints, suggestion, red_line_hit: redLineHit, evidence }
 }
 
 export function matchPlans(allPlans, riskLevel, targetArea, durationMin, scene) {

@@ -25,16 +25,16 @@ defineProps({
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 600;
-  background: rgba(120, 120, 128, 0.16);
+  background: var(--bg);
   color: var(--fg-2);
   transition: all 0.2s;
 }
 .step.active .step-dot {
-  background: var(--fg);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 3px 12px rgba(29, 29, 31, 0.3);
+
 }
-.step.done .step-dot { background: var(--accent); color: #fff; }
+.step.done .step-dot { background: var(--accent-soft); color: var(--accent); }
 .step-title { font-size: 13px; font-weight: 500; color: var(--fg-2); }
 .step.active .step-title { color: var(--fg); font-weight: 600; }
 .step.done .step-title { color: var(--fg); }
@@ -43,7 +43,7 @@ defineProps({
   height: 2px;
   margin: 0 10px;
   border-radius: 1px;
-  background: rgba(120, 120, 128, 0.2);
+  background: var(--line);
 }
 .step-line.done { background: var(--accent); }
 </style>

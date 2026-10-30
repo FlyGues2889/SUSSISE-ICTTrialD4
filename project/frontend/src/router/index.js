@@ -7,6 +7,8 @@ const routes = [
   { path: '/plans', name: 'Plans', component: () => import('../views/Plans.vue') },
   { path: '/session/:planId', name: 'TrainingSession', component: () => import('../views/TrainingSession.vue') },
   { path: '/tracking', name: 'Tracking', component: () => import('../views/Tracking.vue') },
+  { path: '/guidelines', name: 'Guidelines', component: () => import('../views/Guidelines.vue') },
+  { path: '/qa', name: 'Qa', component: () => import('../views/Qa.vue') },
   { path: '/profile', name: 'Profile', component: () => import('../views/Profile.vue') },
 ]
 

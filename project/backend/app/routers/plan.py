@@ -3,18 +3,73 @@ import os
 import sys
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user
 from app.db.mysql import get_session
+from app.services import cache
 
 router = APIRouter()
+
+CUSTOM_ID_OFFSET = 900000
 
 SKILLS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "skills")
 if SKILLS_PATH not in sys.path:
     sys.path.insert(0, SKILLS_PATH)
 from plan_matcher import match_plans
+
+
+class FavoriteRequest(BaseModel):
+    on: bool = True
+
+
+class CustomPlanRequest(BaseModel):
+    name: str | None = None
+    target_area: str = "neck"
+    duration_min: int = 3
+    scene: str = "desk"
+    movements: list[dict] = []
+    description: str | None = None
+
+
+def _custom_row_to_dict(r):
+    return {
+        "plan_id": CUSTOM_ID_OFFSET + r.plan_id,
+        "name": r.name,
+        "duration_min": r.duration_min,
+        "target_area": r.target_area,
+        "scene": r.scene,
+        "movements": json.loads(r.movements) if r.movements else [],
+        "suitable_level": "low,medium",
+        "contraindication": "",
+        "description": r.description or "自定义方案",
+        "is_custom": True,
+    }
+
+
+async def _favorite_ids(session: AsyncSession, user_id: int) -> set[int]:
+    rows = await session.execute(
+        text("SELECT plan_id FROM plan_favorite WHERE user_id = :uid"), {"uid": user_id}
+    )
+    return {int(r.plan_id) for r in rows}
+
+
+async def _custom_plans(session: AsyncSession, user_id: int, area=None, duration=None, scene=None):
+    sql = "SELECT plan_id, name, duration_min, target_area, scene, movements, description FROM custom_plan WHERE user_id = :uid"
+    params = {"uid": user_id}
+    if area:
+        sql += " AND (target_area = :area OR target_area = 'full')"
+        params["area"] = area
+    if duration:
+        sql += " AND duration_min = :duration"
+        params["duration"] = duration
+    if scene:
+        sql += " AND scene = :scene"
+        params["scene"] = scene
+    rows = await session.execute(text(sql + " ORDER BY plan_id DESC"), params)
+    return [_custom_row_to_dict(r) for r in rows]
 
 
 @router.get("/recommend", summary="推荐运动方案")
@@ -26,33 +81,188 @@ async def recommend_plans(
     user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
+    cache_key = f"plans:hot:{area}:{duration}:{scene}:{risk_level}"
+    if risk_level == "high":
+        return {
+            "plans": [],
+            "blocked": True,
+            "message": "高风险期间暂不推荐运动方案，建议先前往骨科或康复科就诊",
+        }
+    all_plans = await cache.get_json(cache_key)
+    if all_plans is None:
+        rows = await session.execute(
+            text(
+                "SELECT plan_id, name, duration_min, target_area, scene, movements, suitable_level, contraindication, description "
+                "FROM exercise_plan WHERE target_area IN (:area, 'full') AND duration_min = :duration AND scene = :scene"
+            ),
+            {"area": area, "duration": duration, "scene": scene},
+        )
+        all_plans = []
+        for r in rows:
+            all_plans.append({
+                "plan_id": r.plan_id,
+                "name": r.name,
+                "duration_min": r.duration_min,
+                "target_area": r.target_area,
+                "scene": r.scene,
+                "movements": json.loads(r.movements) if r.movements else [],
+                "suitable_level": r.suitable_level or "",
+                "contraindication": r.contraindication or "",
+                "description": r.description or "",
+            })
+        await cache.set_json(cache_key, all_plans, 300)
+
+    all_plans = await _custom_plans(session, user["user_id"], area, duration, scene) + all_plans
+
+    recommended = match_plans(all_plans, risk_level, area, duration, scene)
+    favorites = await _favorite_ids(session, user["user_id"])
+    for plan in recommended:
+        plan["is_favorite"] = plan["plan_id"] in favorites
+    return {"plans": recommended}
+
+
+@router.get("/movement-pool", summary="自定义方案动作池")
+async def movement_pool(area: str = Query(..., description="部位: neck/back/full"), session: AsyncSession = Depends(get_session)):
+    rows = await session.execute(
+        text("SELECT movements FROM exercise_plan WHERE target_area = :area ORDER BY duration_min"),
+        {"area": area},
+    )
+    pool = {}
+    for r in rows:
+        for m in json.loads(r.movements) if r.movements else []:
+            name = m.get("name")
+            if name and name not in pool:
+                pool[name] = {
+                    "name": name,
+                    "duration_sec": 30,
+                    "description": m.get("description", ""),
+                    "tips": m.get("tips", ""),
+                }
+    return {"items": list(pool.values())}
+
+
+@router.get("/favorites", summary="收藏的方案")
+async def list_favorites(user: dict = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    favorites = await _favorite_ids(session, user["user_id"])
+    if not favorites:
+        return {"items": []}
+
     rows = await session.execute(
         text(
             "SELECT plan_id, name, duration_min, target_area, scene, movements, suitable_level, contraindication, description "
-            "FROM exercise_plan WHERE target_area IN (:area, 'full') AND duration_min = :duration AND scene = :scene"
-        ),
-        {"area": area, "duration": duration, "scene": scene},
+            "FROM exercise_plan"
+        )
     )
-    all_plans = []
+    items = []
     for r in rows:
-        all_plans.append({
-            "plan_id": r.plan_id,
-            "name": r.name,
-            "duration_min": r.duration_min,
-            "target_area": r.target_area,
-            "scene": r.scene,
-            "movements": json.loads(r.movements) if r.movements else [],
-            "suitable_level": r.suitable_level or "",
-            "contraindication": r.contraindication or "",
-            "description": r.description or "",
-        })
+        if r.plan_id in favorites:
+            items.append({
+                "plan_id": r.plan_id,
+                "name": r.name,
+                "duration_min": r.duration_min,
+                "target_area": r.target_area,
+                "scene": r.scene,
+                "movements": json.loads(r.movements) if r.movements else [],
+                "description": r.description or "",
+                "is_favorite": True,
+            })
 
-    recommended = match_plans(all_plans, risk_level, area, duration, scene)
-    return {"plans": recommended}
+    custom_all = await _custom_plans(session, user["user_id"])
+    items.extend([p for p in custom_all if p["plan_id"] in favorites])
+    return {"items": items}
+
+
+@router.post("/{plan_id}/favorite", summary="收藏/取消收藏")
+async def toggle_favorite(
+    plan_id: int,
+    req: FavoriteRequest,
+    user: dict = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    await session.execute(
+        text("DELETE FROM plan_favorite WHERE user_id = :uid AND plan_id = :pid"),
+        {"uid": user["user_id"], "pid": plan_id},
+    )
+    if req.on:
+        await session.execute(
+            text("INSERT INTO plan_favorite (user_id, plan_id) VALUES (:uid, :pid)"),
+            {"uid": user["user_id"], "pid": plan_id},
+        )
+    await session.commit()
+    favorites = await _favorite_ids(session, user["user_id"])
+    return {"plan_id": plan_id, "is_favorite": req.on, "favorites": sorted(favorites)}
+
+
+@router.post("/custom", summary="新建自定义方案")
+async def create_custom_plan(
+    req: CustomPlanRequest,
+    user: dict = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    if not req.movements:
+        return {"error": "请至少选择一个动作"}
+    name = (req.name or "").strip() or "我的自定义方案"
+    await session.execute(
+        text(
+            "INSERT INTO custom_plan (user_id, name, duration_min, target_area, scene, movements, description) "
+            "VALUES (:uid, :name, :dur, :area, :scene, :mov, :desc)"
+        ),
+        {
+            "uid": user["user_id"],
+            "name": name,
+            "dur": req.duration_min,
+            "area": req.target_area,
+            "scene": req.scene,
+            "mov": json.dumps(req.movements, ensure_ascii=False),
+            "desc": req.description or "自定义方案",
+        },
+    )
+    await session.commit()
+    rows = await session.execute(
+        text(
+            "SELECT plan_id, name, duration_min, target_area, scene, movements, description FROM custom_plan "
+            "WHERE user_id = :uid ORDER BY plan_id DESC LIMIT 1"
+        ),
+        {"uid": user["user_id"]},
+    )
+    r = rows.first()
+    plan = _custom_row_to_dict(r) if r else {}
+    plan["is_favorite"] = False
+    return plan
+
+
+@router.delete("/custom/{plan_id}", summary="删除自定义方案")
+async def delete_custom_plan(
+    plan_id: int,
+    user: dict = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    real_id = plan_id - CUSTOM_ID_OFFSET if plan_id >= CUSTOM_ID_OFFSET else plan_id
+    await session.execute(
+        text("DELETE FROM custom_plan WHERE plan_id = :pid AND user_id = :uid"),
+        {"pid": real_id, "uid": user["user_id"]},
+    )
+    await session.execute(
+        text("DELETE FROM plan_favorite WHERE plan_id = :pid AND user_id = :uid"),
+        {"pid": plan_id, "uid": user["user_id"]},
+    )
+    await session.commit()
+    return {"removed": True}
 
 
 @router.get("/{plan_id}", summary="方案详情")
 async def get_plan(plan_id: int, session: AsyncSession = Depends(get_session)):
+    if plan_id >= CUSTOM_ID_OFFSET:
+        rows = await session.execute(
+            text(
+                "SELECT plan_id, name, duration_min, target_area, scene, movements, description FROM custom_plan "
+                "WHERE plan_id = :pid"
+            ),
+            {"pid": plan_id - CUSTOM_ID_OFFSET},
+        )
+        r = rows.first()
+        return _custom_row_to_dict(r) if r else {"error": "方案不存在"}
+
     row = await session.execute(
         text(
             "SELECT plan_id, name, duration_min, target_area, scene, movements, suitable_level, contraindication, description "

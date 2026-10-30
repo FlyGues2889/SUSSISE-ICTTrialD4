@@ -134,6 +134,23 @@ const CONTRA = {
 const AREA_LABELS = { neck: '肩颈', back: '腰背', full: '全身' }
 const SCENE_LABELS = { desk: '办公桌前', standing: '站立休息', home: '居家' }
 
+export function getMovementPool(area) {
+  const pool = new Map()
+  for (const dur of [3, 5, 10, 15]) {
+    const template = TEMPLATES[`${area}-${dur}`]
+    if (!template) continue
+    for (const movement of template) {
+      if (!pool.has(movement.name)) pool.set(movement.name, movement)
+    }
+  }
+  return [...pool.values()].map((m) => ({
+    name: m.name,
+    duration_sec: 30,
+    description: m.description,
+    tips: m.tips,
+  }))
+}
+
 export function generatePlans() {
   const plans = []
   let id = 1

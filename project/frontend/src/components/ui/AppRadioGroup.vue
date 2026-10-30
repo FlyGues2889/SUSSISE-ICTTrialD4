@@ -30,22 +30,20 @@ defineEmits(['update:modelValue'])
 }
 .radio-group.column { flex-direction: column; }
 .radio-opt {
-  padding: 9px 18px;
+  padding: 10px 18px;
   border-radius: var(--radius-pill);
   font-size: 14px;
   font-weight: 500;
   color: var(--fg);
-  background: rgba(255, 255, 255, 0.6);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--card);
+  border: 1px solid var(--card-border);
   transition: all 0.15s;
 }
 .radio-opt:active { transform: scale(0.96); }
 .radio-opt.active {
-  background: var(--fg);
-  border-color: var(--fg);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(29, 29, 31, 0.25);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
 }
 </style>

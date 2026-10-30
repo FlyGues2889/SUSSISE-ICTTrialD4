@@ -1,0 +1,14 @@
+[Unit]
+Description=D4 sedentary health API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/d4/project/backend
+EnvironmentFile=/etc/d4/api.env
+ExecStart=/usr/bin/python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --workers 2
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -30,18 +30,16 @@ defineEmits(['update:modelValue', 'focus', 'blur'])
 .input-label { font-size: 13px; color: var(--fg-2); font-weight: 500; }
 .input-field {
   width: 100%;
-  padding: 13px 16px;
+  padding: 14px 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.75);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  background: var(--bg);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 }
 .input-field::placeholder { color: var(--fg-3); }
 .input-field:focus {
+  background: var(--card);
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 </style>

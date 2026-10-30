@@ -9,15 +9,15 @@ def respond_qa(question: str, kb_items: list) -> dict:
         keywords = item.get("keywords", "")
         kw_list = [kw.strip().lower() for kw in keywords.split(",") if kw.strip()]
 
-        matched = sum(1 for kw in kw_list if kw in question_lower)
-        if not kw_list:
-            score = 0.0
+        matched = [kw for kw in kw_list if kw in question_lower]
+        total_weight = sum(len(kw) for kw in kw_list)
+        if total_weight:
+            score = sum(len(kw) for kw in matched) / total_weight
         else:
-            score = matched / len(kw_list)
+            score = 0.0
 
-        for word in question_lower:
-            if word in item.get("question", "").lower():
-                score += 0.05
+        if not matched and question_lower in item.get("question", "").lower():
+            score = 0.5
 
         scored.append((item, score))
 

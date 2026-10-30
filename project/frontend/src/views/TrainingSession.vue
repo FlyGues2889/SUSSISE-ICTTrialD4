@@ -2,7 +2,7 @@
   <div class="session-page" v-if="plan">
     <div v-if="!finished" class="session-active">
       <div class="session-header">
-        <button class="back-btn" @click="$router.back()"><Icon name="arrowLeft" :size="22" /></button>
+        <button class="back-btn" @click="requestExit"><Icon name="arrowLeft" :size="22" /></button>
         <span class="plan-name">{{ plan.name }}</span>
         <span class="step-count">{{ currentIdx + 1 }}/{{ plan.movements.length }}</span>
       </div>
@@ -18,7 +18,7 @@
           <svg viewBox="0 0 120 120" class="ring-svg">
             <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="6" />
             <circle
-              cx="60" cy="60" r="54" fill="none" stroke="#1d1d1f" stroke-width="6"
+              cx="60" cy="60" r="54" fill="none" stroke="#2e7d32" stroke-width="6"
               stroke-linecap="round"
               :stroke-dasharray="circumference"
               :stroke-dashoffset="circumference * (1 - timePercent)"
@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      <div class="movement-info glass">
+      <div class="movement-info card-surface">
         <h2 class="m-title">{{ currentMovement.name }}</h2>
         <p class="m-desc">{{ currentMovement.description }}</p>
         <p v-if="currentMovement.tips" class="m-tips">{{ currentMovement.tips }}</p>
@@ -44,11 +44,18 @@
         <a :href="plan.evidence.sourceUrl" target="_blank" class="evidence-link">来源</a>
       </div>
 
+      <div v-if="guide" class="plan-guide">
+        <p class="plan-guide-text">{{ guide.excerpt }}</p>
+        <a class="plan-guide-src" :href="guide.url" target="_blank" rel="noopener">
+          {{ guide.abbr }} · {{ guide.title }}（{{ guide.year }}）↗
+        </a>
+      </div>
+
       <div class="session-controls">
         <AppButton type="secondary" size="lg" :icon="paused ? 'play' : 'pause'" @click="togglePause">
           {{ paused ? '继续' : '暂停' }}
         </AppButton>
-        <AppButton type="primary" size="lg" icon="arrowRight" @click="nextMovement">
+        <AppButton type="accent" size="lg" icon="arrowRight" @click="nextMovement">
           {{ currentIdx < plan.movements.length - 1 ? '下一个' : '完成' }}
         </AppButton>
       </div>
@@ -60,7 +67,7 @@
       </div>
       <h2 class="finish-title">训练完成！</h2>
       <p class="finish-desc">{{ plan.name }}</p>
-      <div class="finish-stats glass">
+      <div class="finish-stats card-surface">
         <div class="finish-stat">
           <span class="fs-num">{{ plan.movements.length }}</span>
           <span class="fs-label">个动作</span>
@@ -80,17 +87,21 @@
         </AppButton>
       </div>
     </div>
+
+    <ConfirmDialog ref="confirmRef" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import MovementImage from '../components/MovementImage.vue'
 import AppButton from '../components/ui/AppButton.vue'
+import ConfirmDialog from '../components/ui/ConfirmDialog.vue'
 import Icon from '../components/ui/Icon.vue'
 import { toast } from '../components/ui/toast.js'
 import { planApi, trainingApi } from '../api'
+import { healthEvidence } from '../mock/healthEvidence'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,9 +111,14 @@ const currentIdx = ref(0)
 const remainingSec = ref(0)
 const paused = ref(false)
 const finished = ref(false)
+const confirmRef = ref(null)
+let allowLeave = false
 let timer = null
 
 const currentMovement = computed(() => plan.value?.movements[currentIdx.value] || {})
+const guide = computed(() =>
+  plan.value ? healthEvidence.getPlanGuideline(plan.value.target_area) : null
+)
 const totalDuration = computed(() => plan.value?.movements.reduce((s, m) => s + m.duration_sec, 0) || 0)
 const progressPercent = computed(() => plan.value ? ((currentIdx.value) / plan.value.movements.length) * 100 : 0)
 const timePercent = computed(() => {
@@ -139,6 +155,36 @@ const nextMovement = () => {
   }
 }
 
+const confirmExit = () =>
+  confirmRef.value.open({
+    title: '退出跟练',
+    message: '本次进度不会保存，确定退出吗？',
+    confirmText: '退出',
+    cancelText: '继续练习',
+    danger: true,
+  })
+
+const requestExit = async () => {
+  if (finished.value || !plan.value) return router.back()
+  if (await confirmExit()) {
+    allowLeave = true
+    router.push('/')
+  }
+}
+
+const onBeforeUnload = (e) => {
+  if (finished.value || allowLeave) return
+  e.preventDefault()
+  e.returnValue = ''
+}
+
+onBeforeRouteLeave(async () => {
+  if (finished.value || allowLeave) return true
+  const ok = await confirmExit()
+  if (ok) allowLeave = true
+  return ok
+})
+
 const completeSession = async () => {
   if (finished.value) return
   finished.value = true
@@ -152,6 +198,7 @@ const completeSession = async () => {
 }
 
 onMounted(async () => {
+  window.addEventListener('beforeunload', onBeforeUnload)
   try {
     const res = await planApi.detail(route.params.planId)
     if (res.error) {
@@ -169,6 +216,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('beforeunload', onBeforeUnload)
   if (timer) clearInterval(timer)
 })
 </script>
@@ -190,18 +238,17 @@ onUnmounted(() => {
 .back-btn {
   width: 38px; height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: var(--card);
+  border: 1px solid var(--card-border);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
-.back-btn:hover { background: rgba(255, 255, 255, 0.95); }
+.back-btn:hover { background: var(--bg); }
 .plan-name { flex: 1; font-size: 16px; font-weight: 600; text-align: center; }
 .step-count { font-size: 14px; color: var(--fg-2); }
 
-.progress-bar { height: 4px; background: rgba(0, 0, 0, 0.08); border-radius: 2px; margin-bottom: 22px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--fg); border-radius: 2px; transition: width 0.3s; }
+.progress-bar { height: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 2px; margin-bottom: 22px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
 
 .movement-display { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 20px; }
 .movement-img { width: 200px; }
@@ -216,11 +263,15 @@ onUnmounted(() => {
 .m-desc { font-size: 14px; color: var(--fg-2); line-height: 1.6; margin-bottom: 4px; }
 .m-tips { font-size: 13px; color: var(--fg-3); }
 
-.plan-evidence { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f8f9fa; border-radius: 8px; margin-bottom: 16px; }
-.evidence-badge { background: #1f1f1f; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
-.evidence-text { font-size: 12px; color: #666; flex: 1; line-height: 1.4; }
-.evidence-link { font-size: 11px; color: #999; text-decoration: none; flex-shrink: 0; }
-.evidence-link:hover { color: #1f1f1f; }
+.plan-evidence { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-radius: 10px; margin-bottom: 16px; }
+.evidence-badge { background: var(--fg); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+.evidence-text { font-size: 12px; color: var(--fg-2); flex: 1; line-height: 1.4; }
+.evidence-link { font-size: 11px; color: var(--fg-3); text-decoration: none; flex-shrink: 0; }
+.evidence-link:hover { color: var(--fg); }
+.plan-guide { padding: 12px 14px; border-left: 2px solid var(--accent-soft); margin-bottom: 16px; }
+.plan-guide-text { font-size: 12px; color: var(--fg-2); line-height: 1.6; }
+.plan-guide-src { display: inline-block; margin-top: 6px; font-size: 11px; color: var(--fg-3); text-decoration: none; }
+.plan-guide-src:hover { color: var(--accent); }
 
 .session-controls { display: flex; gap: 12px; justify-content: center; margin-top: auto; }
 

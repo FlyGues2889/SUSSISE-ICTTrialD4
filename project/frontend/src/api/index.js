@@ -11,6 +11,7 @@ if (USE_MOCK) {
 
 const api = USE_MOCK ? localApi : remoteApi
 
+export const IS_MOCK = USE_MOCK
 export const authApi = api.authApi
 export const assessmentApi = api.assessmentApi
 export const planApi = api.planApi

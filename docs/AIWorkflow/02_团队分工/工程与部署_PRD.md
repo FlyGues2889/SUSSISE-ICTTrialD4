@@ -26,7 +26,7 @@
 | 部署 | ECS 部署、环境配置、Docker 打包 | 华为云资源采购审批 |
 
 ### 1.3 核心交付物
-1. 前端 Web 应用（Vue3 + Element Plus，移动端优先）
+1. 前端 Web 应用（Vue3 + 自研组件库，移动端优先）
 2. 后端 API 服务（FastAPI + SQLAlchemy）
 3. 4 个 CodeArts Skills Python 模块
 4. 数据库建表 SQL（RDS MySQL）
@@ -42,10 +42,10 @@
 
 | 需求项 | 说明 | 优先级 |
 |---|---|---|
-| 技术栈 | Vue3 + Vite + Element Plus + Pinia + Axios | P0 |
-| 设计风格 | 黑白灰极简（#1f1f1f / #f5f5f5）+ 卡片式布局 | P0 |
+| 技术栈 | Vue3 + Vite + Pinia + Axios + 自研 UI 组件 | P0 |
+| 设计风格 | 中性灰极简（#1d1d1f / #f5f5f7）+ 卡片式布局 | P0 |
 | 移动端优先 | 响应式布局，单手可操作 | P0 |
-| 图表 | ECharts（进度追踪可视化） | P1 |
+| 图表 | 纯 SVG + CSS 手绘（趋势折线、占比条形），不引入图表库 | P1 |
 
 #### 页面开发清单
 

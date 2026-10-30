@@ -1,26 +1,28 @@
-/* ===== 设计令牌：Apple 风 + 磨砂玻璃 ===== */
+/* ===== 设计令牌：极简白卡 + 绿色主色 ===== */
 :root {
   --bg: #f5f5f7;
+  --card: #ffffff;
   --fg: #1d1d1f;
-  --fg-2: #86868b;
-  --fg-3: #aeaeb2;
+  --fg-2: #6e6e73;
+  --fg-3: #a1a1a6;
   --line: rgba(0, 0, 0, 0.08);
+
   --accent: #2e7d32;
-  --accent-soft: rgba(46, 125, 50, 0.12);
+  --accent-hover: #276b2b;
+  --accent-soft: #e8f2e9;
   --danger: #c62828;
-  --danger-soft: rgba(198, 40, 40, 0.1);
+  --danger-soft: #fdecea;
   --warn: #e65100;
-  --warn-soft: rgba(230, 81, 0, 0.12);
+  --warn-soft: #fff2e0;
+  --warn-strong-soft: rgba(230, 81, 0, 0.18);
 
-  --glass-bg: rgba(255, 255, 255, 0.66);
-  --glass-bg-strong: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(24px) saturate(180%);
+  --card-border: var(--line);
 
-  --radius-lg: 24px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
+
+  --radius-xl: 32px;
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
   --radius-pill: 999px;
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
@@ -58,14 +60,11 @@ input, select, textarea {
   color: var(--fg);
 }
 
-/* 毛玻璃通用 */
-.glass {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow);
+/* 极简白卡：纯平面，仅靠 1px 边框与背景分层 */
+.card-surface {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
 }
 
 /* 进入动画：仅位移，不改变透明度（避免无头渲染等环境下内容不可见） */
@@ -82,14 +81,15 @@ input, select, textarea {
 .page {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px 18px 40px;
+  padding: 28px 20px 40px;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 6px;
 }
 
 .page-sub {
@@ -99,8 +99,8 @@ input, select, textarea {
 }
 
 @media (min-width: 768px) {
-  .page { max-width: 720px; padding: 28px 24px 48px; }
-  .page-title { font-size: 32px; }
+  .page { max-width: 720px; padding: 40px 24px 48px; }
+  .page-title { font-size: 36px; }
 }
 
 /* ===== Toast ===== */
@@ -127,11 +127,9 @@ input, select, textarea {
   font-size: 14px;
   font-weight: 500;
   color: var(--fg);
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  background: var(--card);
+  border: 1px solid var(--card-border);
+
   opacity: 0;
   transform: translateY(-10px) scale(0.96);
   transition: all 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);

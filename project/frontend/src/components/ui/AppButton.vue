@@ -31,10 +31,11 @@ defineEmits(['click'])
   align-items: center;
   justify-content: center;
   gap: 6px;
+  border: 1px solid transparent;
   border-radius: var(--radius-pill);
   font-weight: 600;
   letter-spacing: -0.01em;
-  transition: transform 0.15s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.15s, background 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.15s, background 0.15s;
   user-select: none;
 }
 .app-btn:active:not(:disabled) { transform: scale(0.97); }
@@ -42,23 +43,22 @@ defineEmits(['click'])
 
 .app-btn.sm { padding: 7px 16px; font-size: 13px; }
 .app-btn.md { padding: 11px 22px; font-size: 15px; }
-.app-btn.lg { padding: 15px 28px; font-size: 17px; }
+.app-btn.lg { padding: 16px 36px; font-size: 17px; }
 .app-btn.block { width: 100%; }
 
-.app-btn.primary { background: var(--fg); color: #fff; box-shadow: 0 4px 16px rgba(29, 29, 31, 0.22); }
+.app-btn.primary { background: var(--fg); color: #fff; }
 .app-btn.primary:hover:not(:disabled) { background: #2c2c2e; }
-.app-btn.accent { background: var(--accent); color: #fff; box-shadow: 0 4px 16px rgba(46, 125, 50, 0.28); }
-.app-btn.accent:hover:not(:disabled) { background: #276b2b; }
+.app-btn.accent { background: var(--accent); color: #fff; }
+.app-btn.accent:hover:not(:disabled) { background: var(--accent-hover); transform: scale(1.02); }
+.app-btn.accent:active:not(:disabled) { transform: scale(0.98); }
 .app-btn.secondary {
-  background: rgba(255, 255, 255, 0.7);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--card);
+  border-color: rgba(0, 0, 0, 0.18);
   color: var(--fg);
 }
-.app-btn.secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.95); }
-.app-btn.ghost { background: transparent; color: var(--fg); }
-.app-btn.ghost:hover:not(:disabled) { background: rgba(0, 0, 0, 0.05); }
+.app-btn.secondary:hover:not(:disabled) { background: var(--bg); border-color: rgba(0, 0, 0, 0.3); }
+.app-btn.ghost { background: transparent; color: var(--fg-2); }
+.app-btn.ghost:hover:not(:disabled) { background: rgba(0, 0, 0, 0.04); color: var(--fg); }
 .app-btn.danger { background: var(--danger-soft); color: var(--danger); }
 .app-btn.danger:hover:not(:disabled) { background: rgba(198, 40, 40, 0.16); }
 

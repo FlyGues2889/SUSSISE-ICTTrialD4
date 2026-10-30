@@ -24,8 +24,11 @@ api.interceptors.response.use(
       if (err.response.status === 401) {
         localStorage.removeItem('d4_token')
         localStorage.removeItem('d4_user')
-        toast.error('登录已过期，请重新登录')
-        window.location.href = '/login'
+        localStorage.removeItem('d4_nickname')
+        if (!window.location.pathname.startsWith('/login')) {
+          toast.error('登录已过期，请重新登录')
+          setTimeout(() => window.location.replace('/login'), 800)
+        }
       } else {
         toast.error(detail || '请求失败')
       }
@@ -45,6 +48,7 @@ api.interceptors.response.use(
 export const authApi = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  demoLogin: (data) => api.post('/auth/demo-login', data),
 }
 
 export const assessmentApi = {
@@ -56,6 +60,11 @@ export const planApi = {
   recommend: (params) => api.get('/plans/recommend', { params }),
   detail: (id) => api.get(`/plans/${id}`),
   list: (params) => api.get('/plans', { params }),
+  favorite: (id, on = true) => api.post(`/plans/${id}/favorite`, { on }),
+  favorites: () => api.get('/plans/favorites'),
+  createCustom: (data) => api.post('/plans/custom', data),
+  removeCustom: (id) => api.delete(`/plans/custom/${id}`),
+  movementPool: (area) => api.get('/plans/movement-pool', { params: { area } }),
 }
 
 export const trainingApi = {

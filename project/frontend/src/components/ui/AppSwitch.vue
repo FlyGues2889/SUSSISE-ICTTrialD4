@@ -17,7 +17,7 @@ defineEmits(['update:modelValue'])
   width: 52px;
   height: 31px;
   border-radius: var(--radius-pill);
-  background: rgba(120, 120, 128, 0.24);
+  background: #e3e3e8;
   transition: background 0.2s;
   flex-shrink: 0;
 }
@@ -30,7 +30,7 @@ defineEmits(['update:modelValue'])
   height: 27px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
   transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .app-switch.on .knob { transform: translateX(21px); }

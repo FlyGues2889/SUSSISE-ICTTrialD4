@@ -68,3 +68,22 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     related_plans  JSON,
     category       VARCHAR(50)
 );
+CREATE TABLE IF NOT EXISTS plan_favorite (
+    user_id    BIGINT NOT NULL,
+    plan_id    BIGINT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, plan_id)
+);
+
+CREATE TABLE IF NOT EXISTS custom_plan (
+    plan_id      BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id      BIGINT NOT NULL,
+    name         VARCHAR(100) NOT NULL,
+    duration_min INT NOT NULL,
+    target_area  VARCHAR(20) NOT NULL,
+    scene        VARCHAR(20) NOT NULL,
+    movements    JSON NOT NULL,
+    description  TEXT,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_custom_user (user_id)
+);
