@@ -26,11 +26,11 @@ defineEmits(['update:modelValue', 'focus', 'blur'])
 </script>
 
 <style scoped>
-.app-input { display: flex; flex-direction: column; gap: 7px; }
+.app-input { display: flex; flex-direction: column; gap: 5px; }
 .input-label { font-size: 13px; color: var(--fg-2); font-weight: 500; }
 .input-field {
   width: 100%;
-  padding: 14px 16px;
+  padding: 11px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--card-border);
   background: var(--bg);

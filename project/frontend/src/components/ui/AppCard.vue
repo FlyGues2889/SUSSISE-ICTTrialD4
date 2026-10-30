@@ -9,6 +9,6 @@
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 18px;
 }
 </style>

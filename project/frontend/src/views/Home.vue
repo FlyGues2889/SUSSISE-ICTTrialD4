@@ -2,58 +2,66 @@
   <div class="page home">
     <!-- 未评估：一步一动作 -->
     <section v-if="!hasAssessment" class="hero fade-up">
-      <p class="kicker">第一步</p>
-      <h1 class="hero-title">先做一次<br />体态评估</h1>
-      <p class="hero-desc">3 分钟，答完就知道该练什么</p>
-      <AppButton type="accent" size="lg" @click="go('/assessment')">开始评估</AppButton>
-      <p class="hero-foot">提供健康运动指导，不替代医疗诊断</p>
+      <div class="hero-top">
+        <p class="kicker">第一步</p>
+        <h1 class="hero-title">先做一次<br />体态评估</h1>
+        <p class="hero-desc">3 分钟，答完就知道该练什么</p>
+      </div>
+      <div class="hero-bottom">
+        <AppButton type="accent" size="lg" @click="go('/assessment')">开始评估</AppButton>
+        <p class="hero-foot">提供健康运动指导，不替代医疗诊断</p>
+      </div>
     </section>
 
     <template v-else>
       <!-- 已评估：一屏一个动作 -->
       <section class="hero fade-up">
-        <p class="kicker">来试试</p>
-        <h1 v-if="current" class="hero-title">{{ current.name }}</h1>
-        <h1 v-else class="hero-title">暂时没有方案</h1>
+        <div class="hero-top">
+          <p class="kicker">来试试</p>
+          <h1 v-if="current" class="hero-title">{{ current.name }}</h1>
+          <h1 v-else class="hero-title">暂时没有方案</h1>
 
-        <p class="hero-desc">
-          <template v-if="current">{{ current.duration_min }} 分钟 · {{ areaLabel(current.target_area) }}</template>
-          <template v-else-if="latestRisk === 'high'">高风险期间先遵医嘱</template>
-          <template v-else>换个组合再看看</template>
-        </p>
+          <p class="hero-desc">
+            <template v-if="current">{{ current.duration_min }} 分钟 · {{ areaLabel(current.target_area) }}</template>
+            <template v-else-if="latestRisk === 'high'">高风险期间先遵医嘱</template>
+            <template v-else>换个组合再看看</template>
+          </p>
 
-        <AppButton v-if="current" type="accent" size="lg" @click="start(current)">开始</AppButton>
-        <AppButton v-else-if="latestRisk === 'high'" type="secondary" size="lg" @click="go('/guidelines')">查看健康依据</AppButton>
-        <AppButton v-else type="secondary" size="lg" @click="go('/plans')">看看全部方案</AppButton>
+          <section v-if="current && guidelines.length" class="guides">
+            <p class="guides-kicker">指南依据</p>
+            <blockquote v-for="g in guidelines" :key="g.id" class="guide">
+              <p class="guide-text">{{ g.excerpt }}</p>
+              <p class="guide-src">
+                <span class="guide-abbr">{{ g.abbr }}</span>
+                {{ g.title }} · {{ g.year }}
+              </p>
+            </blockquote>
+            <button class="guides-more" @click="go('/guidelines')">全部 {{ totalGuides }} 条指南</button>
+          </section>
 
-        <div v-if="current" class="hero-actions">
-          <button v-if="plans.length > 1" class="swap" @click="swap">换一组</button>
-          <button v-if="latestRisk !== 'high'" class="swap" @click="go('/plans')">所有方案</button>
+          <p v-if="latestRisk === 'high'" class="safety">
+            高风险期间暂不推荐运动，建议先前往骨科或康复科就诊
+          </p>
+        </div>
+
+        <div class="hero-bottom">
+          <AppButton v-if="current" type="accent" size="lg" @click="start(current)">开始</AppButton>
+          <AppButton v-else-if="latestRisk === 'high'" type="secondary" size="lg" @click="go('/guidelines')">查看健康依据</AppButton>
+          <AppButton v-else type="secondary" size="lg" @click="go('/plans')">看看全部方案</AppButton>
+
+          <div v-if="current" class="hero-actions">
+            <button v-if="plans.length > 1" class="swap" @click="swap">换一组</button>
+            <button v-if="latestRisk !== 'high'" class="swap" @click="go('/plans')">所有方案</button>
+          </div>
+
+          <footer class="home-foot">
+            <span>{{ streak }} 天连续</span>
+            <span class="sep">·</span>
+            <span>本周 {{ weekStats.total_count || 0 }} 次</span>
+            <span v-if="todayDone" class="done">今天已练</span>
+          </footer>
         </div>
       </section>
-
-      <section v-if="current && guidelines.length" class="guides fade-up">
-        <p class="guides-kicker">指南依据</p>
-        <blockquote v-for="g in guidelines" :key="g.id" class="guide">
-          <p class="guide-text">{{ g.excerpt }}</p>
-          <p class="guide-src">
-            <span class="guide-abbr">{{ g.abbr }}</span>
-            {{ g.title }} · {{ g.year }}
-          </p>
-        </blockquote>
-        <button class="guides-more" @click="go('/guidelines')">全部 {{ totalGuides }} 条指南</button>
-      </section>
-
-      <p v-if="latestRisk === 'high'" class="safety">
-        高风险期间暂不推荐运动，建议先前往骨科或康复科就诊
-      </p>
-
-      <footer class="home-foot">
-        <span>{{ streak }} 天连续</span>
-        <span class="sep">·</span>
-        <span>本周 {{ weekStats.total_count || 0 }} 次</span>
-        <span v-if="todayDone" class="done">今天已练</span>
-      </footer>
     </template>
   </div>
 </template>
@@ -80,7 +88,7 @@ const activeIndex = ref(0)
 const current = computed(() => plans.value[activeIndex.value] || null)
 
 const guidelines = computed(() =>
-  current.value ? healthEvidence.getGuidelines(current.value.target_area, 2) : []
+  current.value ? healthEvidence.getGuidelines(current.value.target_area, 1) : []
 )
 const totalGuides = computed(() => healthEvidence.guidelines.length)
 
@@ -160,28 +168,45 @@ onMounted(async () => {
 .home {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 104px);
+  min-height: calc(100vh - 112px);
 }
 
 .hero {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 0 1rem 4rem 1rem;
+  flex: 1;
+  padding: 0 0.25rem;
 }
 
+.hero-top {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-bottom {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-bottom .app-btn { width: 100%; max-width: 420px; }
+
 .kicker {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent-2);
 }
 
 .hero-title {
-  font-size: 8vh;
+  font-size: clamp(32px, 7.2vw, 46px);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
   color: var(--fg);
   max-width: 520px;
 }
@@ -190,14 +215,14 @@ onMounted(async () => {
   font-size: 15px;
   color: var(--fg-2);
   line-height: 1.6;
-  max-width: 340px;
+  max-width: 360px;
 }
 
-.hero .app-btn { margin-top: 10px; }
+.hero .app-btn { margin-top: 0; }
 
 .swap {
   margin-top: 2px;
-  padding: 10px 24px;
+  padding: 8px 20px;
   border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: var(--radius-pill);
   background: var(--card);
@@ -212,13 +237,14 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 8px;
 }
 .hero-actions .swap { margin-top: 0; }
 
 
 .hero-foot {
-  margin-top: 18px;
+  margin-top: 0;
+  text-align: center;
   font-size: 11px;
   color: var(--fg-3);
 }
@@ -226,27 +252,27 @@ onMounted(async () => {
 .guides {
   width: 100%;
   max-width: 420px;
-  margin: 30px auto 0;
+  margin: 8px 0 0;
   text-align: left;
 }
 
 .guides-kicker {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.12em;
-  color: var(--fg-3);
+  color: var(--accent-2);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .guide {
-  padding-left: 14px;
-  border-left: 2px solid var(--accent-soft);
-  margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent-2-line);
+  margin-bottom: 8px;
 }
 
 .guide-text {
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.7;
   color: var(--fg-2);
 }
@@ -259,7 +285,7 @@ onMounted(async () => {
 
 .guide-abbr {
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-2);
   margin-right: 4px;
 }
 
@@ -269,12 +295,12 @@ onMounted(async () => {
   padding: 4px 0;
   transition: color 0.15s;
 }
-.guides-more:hover { color: var(--accent); }
+.guides-more:hover { color: var(--accent-2); }
 
 .safety {
-  margin: 26px auto 0;
+  margin: 8px 0 0;
   max-width: 420px;
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
   background: var(--danger-soft);
   color: var(--danger);
@@ -284,8 +310,8 @@ onMounted(async () => {
 }
 
 .home-foot {
-  margin-top: auto;
-  padding-top: 32px;
+  margin-top: 4px;
+  padding-top: 0;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -92,22 +92,22 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/pr
 </script>
 
 <style scoped>
-.qa-page { display: flex; flex-direction: column; min-height: calc(100vh - 104px); }
+.qa-page { display: flex; flex-direction: column; min-height: calc(100vh - 88px); }
 
 .back {
   align-self: flex-start;
   font-size: 13px;
   color: var(--fg-3);
   padding: 2px 0;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   transition: color 0.15s;
 }
 .back:hover { color: var(--fg); }
 
-.suggests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.suggests { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .suggest {
   align-self: flex-start;
-  padding: 9px 16px;
+  padding: 7px 14px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-pill);
   background: var(--card);
@@ -118,7 +118,7 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/pr
 }
 .suggest:hover { border-color: var(--fg-3); color: var(--fg); }
 
-.thread { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.thread { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 
 .q-bubble {
   align-self: flex-end;
@@ -132,32 +132,32 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/pr
 }
 
 .a-block {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
   background: var(--card);
 }
 .a-tag {
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   padding: 1px 8px;
   border-radius: var(--radius-pill);
   background: var(--bg);
   font-size: 11px;
   color: var(--fg-3);
 }
-.a-tag-ai { background: var(--accent-soft); color: var(--accent); }
+.a-tag-ai { background: var(--accent-2-soft); color: var(--accent-2); }
 .a-text { font-size: 14px; line-height: 1.75; color: var(--fg); }
 .a-src { margin-top: 8px; font-size: 11px; color: var(--fg-3); }
 .a-loading { font-size: 13px; color: var(--fg-3); }
 
 .ask-bar {
   position: sticky;
-  bottom: 88px;
+  bottom: 76px;
   display: flex;
   gap: 8px;
   margin-top: auto;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
   background: var(--card);
@@ -176,7 +176,7 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/pr
 .ask-input:focus { border-color: var(--accent); }
 
 .disclaimer {
-  margin-top: 16px;
+  margin-top: 10px;
   text-align: center;
   font-size: 11px;
   color: var(--fg-3);

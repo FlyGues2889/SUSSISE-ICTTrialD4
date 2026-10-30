@@ -3,6 +3,7 @@
     <h1 class="page-title">提醒与追踪</h1>
     <p class="page-sub">久坐提醒与你的运动记录</p>
 
+    <div class="cards">
     <AppCard class="card fade-up">
       <h3 class="card-title">久坐提醒设置</h3>
       <div class="reminder-form">
@@ -122,7 +123,7 @@
         </div>
         <div class="trend-legend">
           <span class="legend-item"><i class="dot" style="background: var(--accent)" />肩颈</span>
-          <span class="legend-item"><i class="dot" style="background: rgba(46,125,50,.45)" />腰背</span>
+          <span class="legend-item"><i class="dot" style="background: var(--accent-2)" />腰背</span>
           <span class="legend-item legend-hint">越低越好，虚线为风险分界</span>
         </div>
       </template>
@@ -155,6 +156,7 @@
       </template>
       <AppEmpty v-else text="近 30 天暂无评估记录" icon="activity" />
     </AppCard>
+    </div>
 
     <div class="flow-guide">
       <AppButton type="accent" size="lg" block @click="$router.push('/')">
@@ -203,7 +205,7 @@ const TREND_PAD_Y = 14
 const SCORE_MAX = 36.6
 const AREA_META = [
   { area: 'neck', label: '肩颈', color: 'var(--accent)' },
-  { area: 'back', label: '腰背', color: 'rgba(46,125,50,.45)' },
+  { area: 'back', label: '腰背', color: 'var(--accent-2)' },
 ]
 
 const activeDays = computed(() => (monthStats.value.items || []).length)
@@ -271,7 +273,7 @@ const intervalOptions = [30, 45, 60, 90].map((v) => ({ value: v, label: `${v}分
 
 const barHeight = (count) => {
   const max = Math.max(1, ...(weekStats.value.items || []).map((i) => i.count))
-  return `${Math.max(6, Math.round((count / max) * 100))}px`
+  return `${Math.max(8, Math.round((count / max) * 100))}%`
 }
 
 const saveReminder = async () => {
@@ -316,10 +318,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.card { padding: 22px; margin-bottom: 16px; }
-.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-.reminder-form { display: flex; flex-direction: column; gap: 16px; }
-.form-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card { padding: 16px; }
+@media (min-width: 900px) {
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+  .cards .card:first-child { grid-column: 1 / -1; }
+  .reminder-form :deep(.app-btn) { max-width: 360px; margin-left: auto; margin-right: auto; }
+}
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.reminder-form { display: flex; flex-direction: column; gap: 10px; }
+.form-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.form-row :deep(.radio-group) { flex: 1; min-width: 0; justify-content: flex-end; }
 .form-row > label { font-size: 14px; color: var(--fg); font-weight: 500; white-space: nowrap; }
 .notify-status { display: flex; align-items: center; }
 .notify-ok { font-size: 13px; color: var(--accent); font-weight: 500; }
@@ -344,24 +353,24 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 14px;
+  padding: 8px 12px;
   background: var(--accent-soft);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--accent);
 }
 
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
 .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.stat-num { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+.stat-num { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
 .stat-label { font-size: 12px; color: var(--fg-2); }
 
-.stats-chart { display: flex; align-items: flex-end; gap: 8px; height: 110px; }
-.bar-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 0; }
-.bar { width: 60%; max-width: 28px; background: var(--accent); border-radius: 6px 6px 0 0; min-height: 6px; transition: height 0.3s; }
+.stats-chart { display: flex; align-items: flex-end; gap: 8px; height: 96px; }
+.bar-item { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; min-width: 0; height: 100%; }
+.bar { width: 60%; max-width: 28px; max-height: calc(100% - 16px); background: var(--accent-2); border-radius: 6px 6px 0 0; min-height: 6px; transition: height 0.3s; }
 .bar-label { font-size: 10px; color: var(--fg-3); }
 
-.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
 .card-note { font-size: 12px; color: var(--fg-3); }
 
 .trend-svg { display: block; width: 100%; height: auto; }
@@ -373,13 +382,13 @@ onMounted(async () => {
 .legend-item .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .legend-hint { margin-left: auto; color: var(--fg-3); font-size: 11px; }
 
-.focus-list { display: flex; flex-direction: column; gap: 14px; }
+.focus-list { display: flex; flex-direction: column; gap: 10px; }
 .focus-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
 .focus-name { font-size: 14px; font-weight: 500; }
 .focus-count { font-size: 12px; color: var(--fg-2); }
 .focus-track { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; }
 .focus-bar { height: 100%; border-radius: 999px; min-width: 4px; transition: width 0.3s; }
-.focus-points { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--card-border); }
+.focus-points { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--card-border); }
 .points-label { display: block; font-size: 12px; color: var(--fg-3); margin-bottom: 8px; }
 .points-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 .point-tag {

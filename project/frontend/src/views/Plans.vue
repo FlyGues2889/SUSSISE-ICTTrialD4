@@ -81,7 +81,7 @@
           </span>
           <span class="plan-meta">{{ plan.duration_min }}分钟 · {{ areaLabel(plan.target_area) }} · {{ sceneLabel(plan.scene) }}</span>
           <span class="plan-match">
-            <Icon name="spark" :size="13" color="var(--accent)" />
+            <Icon name="spark" :size="13" color="var(--accent-2)" />
             匹配度 {{ Math.round((plan.match_score || 0) * 100) }}%
           </span>
         </div>
@@ -294,11 +294,17 @@ const resetFilters = () => {
 </script>
 
 <style scoped>
-.filter-card { padding: 22px; margin-bottom: 14px; }
-.filter-group { margin-bottom: 14px; }
-.filter-group label { display: block; font-size: 13px; color: var(--fg-2); font-weight: 500; margin-bottom: 8px; }
+.filter-card { padding: 16px; margin-bottom: 10px; }
+.filter-group { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.filter-group label {
+  flex: 0 0 28px;
+  font-size: 12px;
+  color: var(--fg-3);
+  font-weight: 500;
+}
+.filter-group :deep(.radio-group) { flex: 1; min-width: 0; }
 
-.quick-row { display: flex; gap: 10px; margin-top: 12px; }
+.quick-row { display: flex; gap: 10px; margin-top: 8px; }
 .quick-btn {
   flex: 1;
   padding: 9px 12px;
@@ -313,8 +319,8 @@ const resetFilters = () => {
 .quick-btn:hover { border-color: rgba(0, 0, 0, 0.3); }
 .quick-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
-.custom-card { padding: 22px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
-.custom-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.custom-card { padding: 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+.custom-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
 .movement-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 .movement-opt {
   padding: 8px 14px;
@@ -351,8 +357,8 @@ const resetFilters = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 36px 20px;
+  gap: 6px;
+  padding: 24px 16px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
   background: var(--card);
@@ -361,22 +367,22 @@ const resetFilters = () => {
 .empty-title { font-size: 15px; font-weight: 600; }
 .empty-desc { font-size: 13px; color: var(--fg-2); margin-bottom: 8px; line-height: 1.6; }
 
-.plan-list { display: flex; flex-direction: column; gap: 12px; }
+.plan-list { display: flex; flex-direction: column; gap: 10px; }
 .plan-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
+  gap: 12px;
+  padding: 14px 16px;
   cursor: pointer;
   border-radius: var(--radius-md);
   transition: transform 0.15s;
 }
 .plan-card:hover { transform: translateY(-2px); }
 .plan-rank {
-  width: 30px; height: 30px;
+  width: 28px; height: 28px;
   border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--accent-2-soft);
+  color: var(--accent-2);
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700;
   flex-shrink: 0;
@@ -392,7 +398,7 @@ const resetFilters = () => {
   border-radius: var(--radius-pill);
 }
 .plan-meta { font-size: 12px; color: var(--fg-2); }
-.plan-match { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent); font-weight: 600; }
+.plan-match { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-2); font-weight: 600; }
 .plan-fav {
   width: 34px; height: 34px;
   border-radius: 50%;
@@ -402,7 +408,7 @@ const resetFilters = () => {
 }
 .plan-fav:hover { background: var(--bg); }
 .plan-cta {
-  width: 38px; height: 38px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
@@ -411,7 +417,14 @@ const resetFilters = () => {
 }
 
 @media (min-width: 768px) {
-  .plan-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .plan-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .plan-card { margin: 0; }
+  .filter-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+  }
+  .filter-card > .app-btn,
+  .filter-card > .quick-row { grid-column: 1 / -1; }
 }
 </style>

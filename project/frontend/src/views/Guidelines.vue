@@ -71,7 +71,7 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/')
   font-size: 13px;
   color: var(--fg-3);
   padding: 2px 0;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   transition: color 0.15s;
 }
 .back:hover { color: var(--fg); }
@@ -80,11 +80,11 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/')
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
 }
 
 .chip {
-  padding: 7px 16px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--line);
   background: var(--card);
@@ -101,16 +101,16 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/')
 }
 
 .item {
-  padding: 4px 0 4px 16px;
+  padding: 2px 0 2px 14px;
   border-left: 2px solid var(--accent-soft);
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .item.danger { border-left-color: var(--danger); }
 
 .item-text {
   font-size: 14px;
-  line-height: 1.75;
+  line-height: 1.65;
   color: var(--fg);
 }
 
@@ -132,11 +132,11 @@ const back = () => (window.history.length > 1 ? router.back() : router.push('/')
   color: var(--fg-3);
   text-decoration: none;
 }
-.item-src:hover .item-name { color: var(--accent); }
+.item-src:hover .item-name { color: var(--accent-2); }
 
 .item-abbr {
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-2);
   letter-spacing: 0.04em;
 }
 

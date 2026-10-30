@@ -13,6 +13,7 @@
       </div>
     </AppCard>
 
+    <div class="profile-grid">
     <AppCard class="card fade-up">
       <div class="card-head">
         <h3 class="card-title">评估历史</h3>
@@ -22,7 +23,7 @@
         </button>
       </div>
       <div v-if="rounds.length" class="history-list">
-        <div v-for="r in rounds" :key="r.created_at" class="history-item">
+        <div v-for="r in visibleRounds" :key="r.created_at" class="history-item">
           <div class="hist-header">
             <AppTag :text="riskLabel(r.variant)" :variant="r.variant" />
             <span class="hist-area">{{ areaText(r) }}</span>
@@ -31,26 +32,34 @@
           <p class="hist-suggestion">{{ r.suggestion }}</p>
           <span class="hist-date">{{ formatTime(r.created_at) }}</span>
         </div>
+        <button v-if="rounds.length > 3" class="history-more" @click="showAll = !showAll">
+          {{ showAll ? '收起' : `展开全部 ${rounds.length} 轮` }}
+        </button>
       </div>
       <AppEmpty v-else text="暂无评估记录" icon="activity" />
     </AppCard>
 
+    <div class="side">
     <AppCard class="card fade-up">
       <h3 class="card-title">关于</h3>
       <p class="about-text">久坐肩颈腰背科学运动干预助手</p>
       <p class="about-text">SUS SISE · 华为ICT大赛创新赛道</p>
-      <button class="guide-entry" @click="go('/guidelines')">
-        <span>指南依据</span>
-        <span class="entry-arrow">→</span>
-      </button>
-      <button class="guide-entry" @click="go('/qa')">
-        <span>常见问题</span>
-        <span class="entry-arrow">→</span>
-      </button>
+      <div class="about-actions">
+        <button class="guide-entry" @click="go('/guidelines')">
+          <span>指南依据</span>
+          <span class="entry-arrow">→</span>
+        </button>
+        <button class="guide-entry" @click="go('/qa')">
+          <span>常见问题</span>
+          <span class="entry-arrow">→</span>
+        </button>
+      </div>
       <p class="disclaimer">本工具提供健康运动指导，不替代医疗诊断，持续不适请及时就医。</p>
     </AppCard>
 
     <AppButton type="danger" size="md" block style="margin-top:6px" @click="logout">退出登录</AppButton>
+    </div>
+    </div>
 
     <ConfirmDialog ref="confirmRef" />
   </div>
@@ -77,6 +86,9 @@ try { user = JSON.parse(localStorage.getItem('d4_user') || 'null') } catch {}
 const nickname = user?.nickname || '用户'
 const userId = user?.user_id || '-'
 const assessments = ref([])
+
+const showAll = ref(false)
+const visibleRounds = computed(() => (showAll.value ? rounds.value : rounds.value.slice(0, 3)))
 
 const riskLabel = (v) =>
   ({ low: '低风险', medium: '中风险', medium_low: '中低风险', medium_high: '中高风险', high: '高风险' }[v] || v)
@@ -172,40 +184,57 @@ onMounted(async () => {
 .profile-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 24px;
-  margin-bottom: 16px;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
 }
 .avatar {
-  width: 56px; height: 56px;
+  width: 46px; height: 46px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-2);
   display: flex; align-items: center; justify-content: center;
 
   flex-shrink: 0;
 }
 .profile-info { display: flex; flex-direction: column; gap: 2px; }
-.profile-name { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.profile-name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
 .profile-id { font-size: 12px; color: var(--fg-2); }
 
-.card { padding: 22px; margin-bottom: 16px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.profile-grid { display: flex; flex-direction: column; gap: 10px; }
+.side { display: flex; flex-direction: column; gap: 10px; }
+.card { padding: 16px; }
+@media (min-width: 900px) {
+  .profile-grid { display: grid; grid-template-columns: 1.15fr 1fr; align-items: start; }
+}
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .card-title { font-size: 16px; font-weight: 600; }
 .link-btn {
   display: flex; align-items: center; gap: 4px;
-  font-size: 13px; color: var(--accent); font-weight: 600;
+  font-size: 13px; color: var(--accent-2); font-weight: 600;
   transition: opacity 0.15s;
 }
 .link-btn:hover { opacity: 0.75; }
 
-.history-list { display: flex; flex-direction: column; gap: 12px; }
+.history-list { display: flex; flex-direction: column; gap: 8px; }
 .history-item {
   background: var(--bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
-  padding: 14px;
+  padding: 10px 12px;
 }
-.hist-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.history-more {
+  align-self: center;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-2);
+  transition: border-color 0.15s, color 0.15s;
+}
+.history-more:hover { border-color: rgba(0, 0, 0, 0.3); color: var(--fg); }
+.hist-header { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 4px; }
 .hist-area { font-size: 13px; color: var(--fg-2); }
 .hist-score { font-size: 13px; font-weight: 600; margin-left: auto; }
 .hist-suggestion { font-size: 13px; color: var(--fg-2); line-height: 1.5; margin-bottom: 4px; }
@@ -213,13 +242,18 @@ onMounted(async () => {
 
 .about-text { font-size: 13px; color: var(--fg-2); line-height: 1.6; }
 
+.about-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
 .guide-entry {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-top: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   font-size: 13px;

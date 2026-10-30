@@ -10,6 +10,11 @@
   --accent: #2e7d32;
   --accent-hover: #276b2b;
   --accent-soft: #e8f2e9;
+
+  /* 辅助色：与主绿同色系的青绿，用于依据、标签、统计等非主要动作元素 */
+  --accent-2: #0f766e;
+  --accent-2-soft: #e4f1ef;
+  --accent-2-line: rgba(15, 118, 110, 0.26);
   --danger: #c62828;
   --danger-soft: #fdecea;
   --warn: #e65100;
@@ -81,7 +86,7 @@ input, select, textarea {
 .page {
   max-width: 600px;
   margin: 0 auto;
-  padding: 28px 20px 40px;
+  padding: 18px 18px 24px;
 }
 
 .page-title {
@@ -95,12 +100,16 @@ input, select, textarea {
 .page-sub {
   font-size: 14px;
   color: var(--fg-2);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 @media (min-width: 768px) {
-  .page { max-width: 720px; padding: 40px 24px 48px; }
-  .page-title { font-size: 36px; }
+  .page { max-width: 820px; padding: 26px 24px 32px; }
+  .page-title { font-size: 34px; }
+}
+
+@media (min-width: 1200px) {
+  .page { max-width: 960px; }
 }
 
 /* ===== Toast ===== */

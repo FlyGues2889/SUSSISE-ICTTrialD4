@@ -26,11 +26,11 @@ defineEmits(['update:modelValue'])
 .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 .radio-group.column { flex-direction: column; }
 .radio-opt {
-  padding: 10px 18px;
+  padding: 8px 14px;
   border-radius: var(--radius-pill);
   font-size: 14px;
   font-weight: 500;

@@ -267,8 +267,8 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
 
 <style scoped>
 .assessment-form {
-  padding: 24px;
-  min-height: 380px;
+  padding: 18px;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
 }
@@ -281,7 +281,7 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   letter-spacing: 0.04em;
   color: var(--fg-3);
 }
-.quiz-area { color: var(--accent); font-weight: 600; letter-spacing: 0.12em; }
+.quiz-area { color: var(--accent-2); font-weight: 600; letter-spacing: 0.12em; }
 .quiz-bar {
   height: 3px;
   margin: 10px 0 0;
@@ -301,14 +301,14 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 28px 0;
+  padding: 12px 0;
 }
 .q-label {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
   letter-spacing: -0.01em;
-  margin-bottom: 30px;
+  margin-bottom: 18px;
 }
 
 .slide-q-enter-from { transform: translateY(16px); }
@@ -333,15 +333,15 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   background: var(--card);
   transition: border-color 0.15s, color 0.15s;
 }
-.step-link:hover { border-color: rgba(0, 0, 0, 0.3); color: var(--accent); }
+.step-link:hover { border-color: rgba(0, 0, 0, 0.3); color: var(--accent-2); }
 
 .likert-legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 6px 18px;
-  margin: 16px 0 0;
+  gap: 4px 14px;
+  margin: 10px 0 0;
   font-size: 12px;
   color: var(--fg-2);
 }
@@ -389,8 +389,8 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   transition: transform 0.15s;
 }
 .likert-dot .dot {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 50%;
   border: 2px solid;
   background: transparent;
@@ -410,14 +410,14 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
 .likert-dot.active { transform: scale(1.12); }
 
 
-.report { padding: 26px; }
+.report { padding: 18px; }
 .risk-badge {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .risk-badge.low { background: var(--accent-soft); }
 .risk-badge.medium { background: var(--warn-soft); }
@@ -436,7 +436,7 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  padding: 16px;
+  padding: 12px;
   border-radius: var(--radius-sm);
   background: var(--danger-soft);
   color: var(--danger);
@@ -454,26 +454,26 @@ onBeforeUnmount(() => clearTimeout(advanceTimer))
   flex-shrink: 0;
 }
 
-.report-section { margin: 18px 0; }
-.report-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+.report-section { margin: 12px 0; }
+.report-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
 .report-section p { font-size: 14px; line-height: 1.65; color: var(--fg-2); }
 .problem-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .none-text { font-size: 13px; color: var(--fg-3); }
 
-.flow-guide { margin-top: 24px; }
+.flow-guide { margin-top: 14px; }
 .guide-text { font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 14px; }
 
-.evidence-section { background: var(--bg); border-radius: 12px; padding: 16px; margin: 16px 0; }
+.evidence-section { background: var(--bg); border-radius: 12px; padding: 12px; margin: 12px 0; }
 .evidence-fact { font-size: 13px; color: var(--fg-2); line-height: 1.6; margin-bottom: 6px; }
 .evidence-rec { font-size: 13px; color: var(--fg); line-height: 1.6; margin-bottom: 8px; font-weight: 500; }
 .evidence-source { font-size: 12px; color: var(--fg-3); text-decoration: none; }
-.evidence-source:hover { color: var(--accent); }
+.evidence-source:hover { color: var(--accent-2); }
 .evidence-guide { margin-top: 14px; padding-left: 12px; border-left: 2px solid var(--accent-soft); }
 .evidence-guide p { font-size: 12px; color: var(--fg-2); line-height: 1.7; }
 .evidence-guide a { display: inline-block; margin-top: 6px; font-size: 11px; color: var(--fg-3); text-decoration: none; }
-.evidence-guide a:hover { color: var(--accent); }
+.evidence-guide a:hover { color: var(--accent-2); }
 .evidence-more { margin-top: 14px; font-size: 12px; color: var(--fg-3); padding: 2px 0; }
-.evidence-more:hover { color: var(--accent); }
+.evidence-more:hover { color: var(--accent-2); }
 
 @media (min-width: 768px) {
   .assessment-form, .report { padding: 32px; }

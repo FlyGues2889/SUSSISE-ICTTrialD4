@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'with-nav': showNav }">
     <router-view />
     <nav v-if="showNav" class="bottom-nav card-surface">
       <router-link to="/" class="nav-item" :class="{ active: route.path === '/' }">
@@ -47,13 +47,15 @@ watch(
 <style scoped>
 .app-container {
   min-height: 100vh;
-  /* 底部悬浮导航预留空间 */
-  padding-bottom: 104px;
+}
+/* 仅在显示底部导航时预留空间，登录与跟练页不再多出 88px */
+.app-container.with-nav {
+  padding-bottom: 88px;
 }
 
 .bottom-nav {
   position: fixed;
-  bottom: 1rem;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
 
@@ -69,7 +71,7 @@ watch(
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 26px;
+  padding: 6px 22px;
   border-radius: var(--radius-pill);
   color: var(--fg-2);
   text-decoration: none;
@@ -85,7 +87,7 @@ watch(
 }
 
 @media (min-width: 768px) {
-  .app-container { padding-bottom: 112px; }
-  .nav-item { padding: 9px 32px; font-size: 12px; }
+  .app-container.with-nav { padding-bottom: 92px; }
+  .nav-item { padding: 7px 28px; font-size: 12px; }
 }
 </style>

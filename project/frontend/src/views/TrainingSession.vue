@@ -228,13 +228,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 18px 18px 30px;
+  padding: 12px 16px 16px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
 }
 
-.session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.session-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .back-btn {
   width: 38px; height: 38px;
   border-radius: 50%;
@@ -247,28 +247,28 @@ onUnmounted(() => {
 .plan-name { flex: 1; font-size: 16px; font-weight: 600; text-align: center; }
 .step-count { font-size: 14px; color: var(--fg-2); }
 
-.progress-bar { height: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 2px; margin-bottom: 22px; overflow: hidden; }
+.progress-bar { height: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
 
-.movement-display { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 20px; }
-.movement-img { width: 200px; }
-.timer-ring { position: relative; width: 150px; height: 150px; }
+.movement-display { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 14px; }
+.movement-img { width: 160px; }
+.timer-ring { position: relative; width: 132px; height: 132px; }
 .ring-svg { width: 100%; height: 100%; }
 .timer-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.timer-num { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; }
+.timer-num { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
 .timer-unit { font-size: 12px; color: var(--fg-2); }
 
-.movement-info { padding: 20px; text-align: center; margin-bottom: 22px; }
-.m-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+.movement-info { padding: 14px; text-align: center; margin-bottom: 14px; }
+.m-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
 .m-desc { font-size: 14px; color: var(--fg-2); line-height: 1.6; margin-bottom: 4px; }
 .m-tips { font-size: 13px; color: var(--fg-3); }
 
-.plan-evidence { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-radius: 10px; margin-bottom: 16px; }
+.plan-evidence { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg); border-radius: 10px; margin-bottom: 10px; }
 .evidence-badge { background: var(--fg); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
 .evidence-text { font-size: 12px; color: var(--fg-2); flex: 1; line-height: 1.4; }
 .evidence-link { font-size: 11px; color: var(--fg-3); text-decoration: none; flex-shrink: 0; }
 .evidence-link:hover { color: var(--fg); }
-.plan-guide { padding: 12px 14px; border-left: 2px solid var(--accent-soft); margin-bottom: 16px; }
+.plan-guide { padding: 10px 12px; border-left: 2px solid var(--accent-soft); margin-bottom: 10px; }
 .plan-guide-text { font-size: 12px; color: var(--fg-2); line-height: 1.6; }
 .plan-guide-src { display: inline-block; margin-top: 6px; font-size: 11px; color: var(--fg-3); text-decoration: none; }
 .plan-guide-src:hover { color: var(--accent); }

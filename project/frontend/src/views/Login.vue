@@ -119,46 +119,46 @@ const handleRegister = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 28px 20px 40px;
+  padding: 16px 18px 24px;
 }
 .login-inner {
   width: 100%;
   max-width: 380px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 11px;
 }
 
-.brand { text-align: center; margin-bottom: 18px; }
+.brand { text-align: center; margin-bottom: 6px; }
 .brand-icon {
-  width: 52px; height: 52px;
-  margin: 0 auto 18px;
-  border-radius: 16px;
+  width: 44px; height: 44px;
+  margin: 0 auto 10px;
+  border-radius: 14px;
   background: var(--accent);
   display: flex; align-items: center; justify-content: center;
 
 }
 .title {
-  font-size: clamp(30px, 7vw, 40px);
+  font-size: clamp(28px, 6.4vw, 38px);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.12;
-  margin-bottom: 10px;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  margin-bottom: 6px;
 }
-.subtitle { font-size: 14px; color: var(--fg-2); }
+.subtitle { font-size: 13px; color: var(--fg-2); }
 
 .kicker {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent-2);
 }
 
-.field { display: flex; flex-direction: column; gap: 7px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
 .input-label { font-size: 13px; color: var(--fg-2); font-weight: 500; }
 .occupation-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 .occ-opt {
-  padding: 9px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius-pill);
   font-size: 14px;
   font-weight: 500;
@@ -192,7 +192,7 @@ const handleRegister = async () => {
   margin-top: 2px;
 }
 
-.login-inner .app-btn { margin-top: 6px; }
+.login-inner .app-btn { margin-top: 2px; }
 
 @media (min-width: 768px) {
   .login-inner { max-width: 420px; }

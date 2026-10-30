@@ -1,6 +1,6 @@
 <template>
   <div class="app-empty">
-    <Icon :name="icon" :size="42" color="var(--fg-3)" />
+    <Icon :name="icon" :size="32" color="var(--fg-3)" />
     <p>{{ text }}</p>
   </div>
 </template>
@@ -19,9 +19,9 @@ defineProps({
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 28px 0;
+  gap: 8px;
+  padding: 16px 0;
   color: var(--fg-2);
-  font-size: 14px;
+  font-size: 13px;
 }
 </style>
